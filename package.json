@@ -13,7 +13,7 @@
     "cli/README-ROUTINE.md"
   ],
   "scripts": {
-    "build": "cd cli && npm ci && npm run build && cd .. && cp -r cli/dist .",
+    "build": "cd cli && npm install && npm run build && cd .. && cp -r cli/dist .",
     "prepare": "npm run build",
     "start": "node dist/index.js",
     "dev": "cd cli && npm run dev",
