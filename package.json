@@ -1,0 +1,68 @@
+{
+  "name": "@pianopia/aireer-cli",
+  "version": "1.0.0",
+  "description": "完全自律型AIサービス「aireer」のCLIツール - 並列実行と定期実行でAPIを叩き続ける思考ルーチン実行ツール",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "aireer": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "cli/README-ROUTINE.md"
+  ],
+  "scripts": {
+    "build": "cd cli && npm ci && npm run build && cd .. && cp -r cli/dist .",
+    "prepare": "npm run build",
+    "start": "node dist/index.js",
+    "dev": "cd cli && npm run dev",
+    "test": "cd cli && npm test",
+    "prepack": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pianopia/aireer-cli.git"
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "autonomous",
+    "routine",
+    "scheduler",
+    "parallel",
+    "api",
+    "automation",
+    "thinking",
+    "llm"
+  ],
+  "author": "pianopia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pianopia/aireer-cli/issues"
+  },
+  "homepage": "https://github.com/pianopia/aireer-cli#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.6.2",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "conf": "^11.0.1",
+    "inquirer": "^9.2.12",
+    "nanoid": "^5.1.5",
+    "node-cron": "^3.0.3",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.4",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.3.3"
+  }
+} 

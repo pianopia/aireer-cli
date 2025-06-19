@@ -1,0 +1,1 @@
+{"name": "定期的な情報収集", "description": "定期的に指定されたトピックの最新情報をWEBやX.com（twitter）から収集し、重要な変更点を報告します。", "steps": [{"step": 1, "description": "指定されたトピックの最新情報を検索", "parameters": {"searchInterval": "1h", "sources": ["news", "blogs", "social"]}}, {"step": 2, "description": "重要な変更点を抽出", "parameters": {"importanceThreshold": 0.7}}, {"step": 3, "description": "変更点を要約して報告", "parameters": {}}]}
