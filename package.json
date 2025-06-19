@@ -13,7 +13,7 @@
     "cli/README-ROUTINE.md"
   ],
   "scripts": {
-    "build": "cd cli && npm install && npm run build && cd .. && cp -r cli/dist .",
+    "build": "npm install && cd cli && npm install && npm run build && cd .. && cp -r cli/dist .",
     "prepare": "npm run build",
     "start": "node dist/index.js",
     "dev": "cd cli && npm run dev",
@@ -57,9 +57,7 @@
     "inquirer": "^9.2.12",
     "nanoid": "^5.1.5",
     "node-cron": "^3.0.3",
-    "ora": "^7.0.1"
-  },
-  "devDependencies": {
+    "ora": "^7.0.1",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^20.10.4",
     "@types/node-cron": "^3.0.11",
