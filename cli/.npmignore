@@ -1,0 +1,22 @@
+# ソースファイル
+src/
+tsconfig.json
+scripts/
+
+# 開発用ファイル
+*.log
+*.tmp
+.DS_Store
+.vscode/
+.idea/
+
+# テスト用ファイル
+task_list.txt
+routine.json
+README-ROUTINE.md
+
+# 依存関係
+node_modules/
+
+# TypeScriptビルド中間ファイル
+*.tsbuildinfo 

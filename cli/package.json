@@ -1,5 +1,5 @@
 {
-  "name": "aireer-cli",
+  "name": "@pianopia/aireer-cli",
   "version": "1.0.0",
   "description": "並列実行と定期実行でAPIを叩き続けるCLIツール",
   "type": "module",
@@ -7,17 +7,32 @@
   "bin": {
     "aireer": "dist/index.js"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pianopia/aireer-cli.git"
+  },
+  "homepage": "https://github.com/pianopia/aireer-cli#readme",
+  "bugs": {
+    "url": "https://github.com/pianopia/aireer-cli/issues"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsc --watch & nodemon dist/index.js",
-    "prepare": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "cli",
     "api",
     "parallel",
-    "scheduler"
+    "scheduler",
+    "automation",
+    "task-runner"
   ],
   "author": "",
   "license": "MIT",
@@ -44,5 +59,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

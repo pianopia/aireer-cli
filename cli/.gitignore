@@ -1,38 +1,15 @@
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Build output
 dist/
-build/
-lib/
 
-# Package files
-*.tgz
-*.tar.gz
+# Logs
+*.log
 
 # Environment variables
 .env
 .env.local
-.env.production
-.env.development
-
-# TypeScript
-*.tsbuildinfo
-
-# Logs
-*.log
-logs/
-
-# Runtime files
-*.pid
-*.seed
-
-# Coverage
-coverage/
-.nyc_output
 
 # IDE
 .vscode/
@@ -40,11 +17,9 @@ coverage/
 
 # OS
 .DS_Store
-Thumbs.db
 
 # Temporary files
-tmp/
-temp/
+*.tmp
 
 # CLI specific files
 .aireer-priorities.json
@@ -75,4 +50,22 @@ test-results/
 .eslintcache
 
 # Prettier
-.prettier-cache 
+.prettier-cache
+
+# npm debug
+npm-debug.log*
+
+# yarn debug
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+.nyc_output
+
+# TypeScript
+*.tsbuildinfo
+
+# Test specific files
+task_list.txt
+routine.json 
