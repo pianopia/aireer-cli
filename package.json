@@ -1,6 +1,6 @@
 {
   "name": "@pianopia/aireer-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "完全自律型AIサービス「aireer」のCLIツール - 並列実行と定期実行でAPIを叩き続ける思考ルーチン実行ツール",
   "type": "module",
   "main": "dist/index.js",
