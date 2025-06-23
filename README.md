@@ -4,31 +4,23 @@
 
 ## 📦 インストール
 
-### 方法1: GitHubから直接インストール（推奨）
+### インストール方法（推奨）
 
 ```bash
 # 最新版をインストール
-npm install -g github:pianopia/aireer-cli
+npm install -g @pianopia/aireer-cli
 
 # 特定のバージョンをインストール  
-npm install -g github:pianopia/aireer-cli#v1.0.0
+npm install -g @pianopia/aireer-cli#v1.0.0
 ```
 
 ### 方法2: GitHub Packagesからインストール
-
-```bash
-# .npmrcファイルでレジストリを設定
-echo "@pianopia:registry=https://npm.pkg.github.com" >> .npmrc
-
-# インストール (GitHub認証が必要)
-npm install -g @pianopia/aireer-cli
-```
 
 ### プロジェクトの依存関係として追加
 
 ```bash
 # package.jsonに追加（GitHubから直接）
-npm install github:pianopia/aireer-cli
+npm install @pianopia/aireer-cli
 
 # または GitHub Packagesから
 npm install @pianopia/aireer-cli
