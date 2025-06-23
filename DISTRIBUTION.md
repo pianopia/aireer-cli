@@ -4,35 +4,22 @@ aireer-cliをnpm installできるパッケージとして配布するための�
 
 ## 🎯 配布可能な形式
 
-### 1. GitHubリポジトリから直接インストール（推奨）
+### 1. インストール方法（推奨）
 
 最も簡単で制約の少ない方法です。
 
 **インストール方法:**
 ```bash
 # グローバルインストール
-npm install -g github:pianopia/aireer-cli
+npm install -g @pianopia/aireer-cli
 
 # プロジェクトの依存関係として
-npm install github:pianopia/aireer-cli
+npm install @pianopia/aireer-cli
 
 # 特定のバージョン・ブランチ・コミット
-npm install github:pianopia/aireer-cli#v1.0.0
-npm install github:pianopia/aireer-cli#main
-npm install github:pianopia/aireer-cli#abc123
-```
-
-### 2. GitHub Packages経由でインストール
-
-npmレジストリライクな管理が可能です。
-
-**インストール方法:**
-```bash
-# .npmrcでレジストリ設定
-echo "@pianopia:registry=https://npm.pkg.github.com" >> .npmrc
-
-# インストール（GitHub認証が必要）
-npm install -g @pianopia/aireer-cli
+npm install @pianopia/aireer-cli#v1.0.0
+npm install @pianopia/aireer-cli#main
+npm install @pianopia/aireer-cli#abc123
 ```
 
 ## 📦 設定済みファイル
