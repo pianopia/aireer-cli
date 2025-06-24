@@ -11,12 +11,52 @@ import { RoutineCreator } from './routine-creator.js';
 import { displayLogo, displayCompactLogo } from './logo.js';
 import { AuthManager } from './auth-manager.js';
 import { ConfigManager } from './config-manager.js';
-import packageJson from '../../package.json' with { type: 'json' };
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Get package.json version dynamically with fallback
+function getPackageVersion(): string {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    
+    // Multiple fallback strategies for different installation scenarios
+    const possiblePaths = [
+      // For development (root package.json)
+      join(__dirname, '..', '..', 'package.json'),
+      // For local cli development
+      join(__dirname, '..', 'package.json'),
+      // For npm global install (look for package.json in the package directory)
+      join(__dirname, 'package.json'),
+      // Alternative global install path
+      join(__dirname, '..', '..', '..', 'package.json')
+    ];
+    
+    for (const packagePath of possiblePaths) {
+      try {
+        const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
+        if (packageJson.version && packageJson.name === '@pianopia/aireer-cli') {
+          return packageJson.version;
+        }
+      } catch {
+        // Continue to next path
+        continue;
+      }
+    }
+    
+    // Ultimate fallback if all paths fail
+    return '1.0.7';
+  } catch {
+    return '1.0.7';
+  }
+}
 
 program
   .name('aireer')
   .description('CLI tool for the fully autonomous AI service "aireer"')
-  .version(packageJson.version, '-v, --version', 'Display version number');
+  .version(getPackageVersion(), '-v, --version', 'Display version number');
 
 // Login
 program
