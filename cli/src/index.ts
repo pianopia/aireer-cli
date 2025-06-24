@@ -18,50 +18,50 @@ const packageJson = {
 
 program
   .name('aireer')
-  .description('完全自律型AIサービス「aireer」のCLIツール')
+  .description('CLI tool for the fully autonomous AI service "aireer"')
   .version(packageJson.version);
 
-// ログイン
+// Login
 program
   .command('login')
-  .description('aireerにログイン')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
+  .description('Login to aireer')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
   .action(async (options: any) => {
     displayCompactLogo();
     const authManager = new AuthManager(options.apiUrl);
     await authManager.login();
   });
 
-// アカウント作成
+// Account creation
 program
   .command('register')
-  .description('新しいaireerアカウントを作成')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
+  .description('Create a new aireer account')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
   .action(async (options: any) => {
     displayCompactLogo();
     const authManager = new AuthManager(options.apiUrl);
     await authManager.register();
   });
 
-// ログアウト
+// Logout
 program
   .command('logout')
-  .description('aireerからログアウト')
+  .description('Logout from aireer')
   .action(async () => {
     displayCompactLogo();
     const authManager = new AuthManager();
     await authManager.logout();
   });
 
-// 設定表示・変更
+// Configuration display/modification
 program
   .command('config')
-  .description('設定の表示・変更')
-  .option('--show', '現在の設定を表示')
-  .option('--llm-mode <mode>', 'LLMモードを設定 (api | gemini-direct)')
-  .option('--gemini-key <key>', 'Gemini APIキーを設定')
-  .option('--gemini-test', 'Gemini API接続テスト')
-  .option('--gemini-guide', 'Gemini API設定ガイドを表示')
+  .description('Display/modify configuration')
+  .option('--show', 'Display current configuration')
+  .option('--llm-mode <mode>', 'Set LLM mode (api | gemini-direct)')
+  .option('--gemini-key <key>', 'Set Gemini API key')
+  .option('--gemini-test', 'Test Gemini API connection')
+  .option('--gemini-guide', 'Display Gemini API setup guide')
   .action(async (options: any) => {
     displayCompactLogo();
     const configManager = new ConfigManager();
@@ -76,14 +76,14 @@ program
     if (options.llmMode) {
       if (options.llmMode === 'api' || options.llmMode === 'gemini-direct') {
         configManager.setLLMMode(options.llmMode);
-        console.log(chalk.green(`✅ LLMモードを「${options.llmMode}」に設定しました`));
+        console.log(chalk.green(`✅ LLM mode set to "${options.llmMode}"`));
         
         if (options.llmMode === 'gemini-direct' && !configManager.getGeminiApiKey()) {
-          console.log(chalk.yellow('⚠️  Gemini Directモードを使用するには、APIキーの設定が必要です'));
+          console.log(chalk.yellow('⚠️  To use Gemini Direct mode, you need to set an API key'));
           configManager.displayGeminiSetupGuide();
         }
       } else {
-        console.log(chalk.red('❌ 無効なLLMモードです。"api" または "gemini-direct" を指定してください。'));
+        console.log(chalk.red('❌ Invalid LLM mode. Please specify "api" or "gemini-direct".'));
         return;
       }
     }
@@ -93,13 +93,13 @@ program
       const { GeminiClient } = await import('./gemini-client.js');
       
       if (!GeminiClient.validateApiKey(options.geminiKey)) {
-        console.log(chalk.red('❌ 無効なGemini APIキーの形式です'));
-        console.log(chalk.gray('   正しい形式: AIza... (39文字)'));
+        console.log(chalk.red('❌ Invalid Gemini API key format'));
+        console.log(chalk.gray('   Correct format: AIza... (39 characters)'));
         return;
       }
       
       configManager.setGeminiApiKey(options.geminiKey);
-      console.log(chalk.green('✅ Gemini APIキーを設定しました'));
+      console.log(chalk.green('✅ Gemini API key has been set'));
       
       // 自動的にLLMモードをgemini-directに変更するか確認
       if (configManager.getLLMMode() !== 'gemini-direct') {
@@ -107,13 +107,13 @@ program
         const { switchMode } = await inquirer.default.prompt([{
           type: 'confirm',
           name: 'switchMode',
-          message: 'LLMモードをGemini Directに切り替えますか？',
+          message: 'Switch LLM mode to Gemini Direct?',
           default: true
         }]);
         
         if (switchMode) {
           configManager.setLLMMode('gemini-direct');
-          console.log(chalk.green('✅ LLMモードをGemini Directに切り替えました'));
+          console.log(chalk.green('✅ Switched LLM mode to Gemini Direct'));
         }
       }
     }
@@ -122,7 +122,7 @@ program
     if (options.geminiTest) {
       const apiKey = configManager.getGeminiApiKey();
       if (!apiKey) {
-        console.log(chalk.red('❌ Gemini APIキーが設定されていません'));
+        console.log(chalk.red('❌ Gemini API key is not set'));
         configManager.displayGeminiSetupGuide();
         return;
       }
@@ -133,12 +133,12 @@ program
         const success = await geminiClient.testConnection();
         
         if (success) {
-          console.log(chalk.green('🎉 Gemini API接続テスト成功！'));
+          console.log(chalk.green('🎉 Gemini API connection test successful!'));
         } else {
-          console.log(chalk.red('❌ Gemini API接続テスト失敗'));
+          console.log(chalk.red('❌ Gemini API connection test failed'));
         }
       } catch (error) {
-        console.log(chalk.red('❌ Gemini API接続テスト失敗'));
+        console.log(chalk.red('❌ Gemini API connection test failed'));
         console.error(error);
       }
       return;
@@ -150,16 +150,16 @@ program
     }
   });
 
-// 自律実行モード（メイン機能）
+// Autonomous execution mode (main feature)
 program
   .command('autonomous')
   .alias('auto')
-  .description('完全自律モード - 思考ルーチンを取得して優先度に基づいて自動実行')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-d, --directory <directory>', '作業ディレクトリ', '.')
-  .option('-i, --interval <seconds>', '実行サイクル間隔（秒）', '60')
-  .option('-e, --llm-endpoint <endpoint>', 'LLMエンドポイント', '/api/llm/generate')
-  .option('-m, --max-executions <number>', '1サイクルあたりの最大実行数', '3')
+  .description('Fully autonomous mode - retrieve thought routines and automatically execute based on priority')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-d, --directory <directory>', 'Working directory', '.')
+  .option('-i, --interval <seconds>', 'Execution cycle interval (seconds)', '60')
+  .option('-e, --llm-endpoint <endpoint>', 'LLM endpoint', '/api/llm/generate')
+  .option('-m, --max-executions <number>', 'Maximum executions per cycle', '3')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     const configManager = authManager.getConfigManager();
@@ -169,16 +169,16 @@ program
     const useGeminiDirect = llmMode === 'gemini-direct';
     
     if (!useGeminiDirect) {
-      // API経由の場合は認証が必要
+      // Authentication required for API mode
       if (!(await authManager.ensureAuthenticated())) {
-        console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+        console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
         process.exit(1);
       }
     } else {
-      // Gemini直接の場合はAPIキーが必要
+      // API key required for Gemini direct mode
       if (!configManager.isGeminiConfigured()) {
-        console.log(chalk.red('❌ Gemini APIキーが設定されていません。'));
-        console.log(chalk.cyan('以下のコマンドでAPIキーを設定してください:'));
+        console.log(chalk.red('❌ Gemini API key is not set.'));
+        console.log(chalk.cyan('Please set the API key with the following command:'));
         console.log(chalk.gray('aireer config --gemini-guide'));
         process.exit(1);
       }
@@ -193,14 +193,14 @@ program
         const apiKey = configManager.getGeminiApiKey()!;
         geminiClient = new GeminiClient(apiKey);
         
-        console.log(chalk.blue('🔍 Gemini API接続確認中...'));
+        console.log(chalk.blue('🔍 Checking Gemini API connection...'));
         const connectionOk = await geminiClient.testConnection();
         if (!connectionOk) {
-          console.log(chalk.red('❌ Gemini APIに接続できません。APIキーを確認してください。'));
+          console.log(chalk.red('❌ Cannot connect to Gemini API. Please check your API key.'));
           process.exit(1);
         }
       } catch (error) {
-        console.log(chalk.red('❌ Gemini クライアントの初期化に失敗しました:'), error);
+        console.log(chalk.red('❌ Failed to initialize Gemini client:'), error);
         process.exit(1);
       }
     }
@@ -217,22 +217,22 @@ program
     });
   });
 
-// 思考ルーチン管理コマンド
+// Thought routine management commands
 const routineCommand = program
   .command('routine')
-  .description('思考ルーチンの作成と管理');
+  .description('Create and manage thought routines');
 
-// 思考ルーチン作成
+// Create thought routine
 routineCommand
   .command('create')
-  .description('新しい思考ルーチンを作成')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
+  .description('Create a new thought routine')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -241,17 +241,17 @@ routineCommand
     await routineCreator.createThinkingRoutine();
   });
 
-// ルーチン一覧表示
+// Display routine list
 routineCommand
   .command('list')
-  .description('登録済みの思考ルーチン一覧を表示')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
+  .description('Display list of registered thought routines')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -260,13 +260,13 @@ routineCommand
     await routineCreator.listRoutines();
   });
 
-// 実行履歴表示
+// Display execution history
 routineCommand
   .command('history')
-  .description('ルーチンの実行履歴を表示')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-l, --limit <number>', '表示する履歴数', '20')
-  .option('-r, --routine-id <id>', '特定のルーチンIDでフィルタ')
+  .description('Display routine execution history')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-l, --limit <number>', 'Number of history entries to display', '20')
+  .option('-r, --routine-id <id>', 'Filter by specific routine ID')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
@@ -290,12 +290,12 @@ routineCommand
     await executionHistory.displayHistory(parseInt(options.limit), options.routineId);
   });
 
-// 実行統計表示
+// Display execution statistics
 routineCommand
   .command('stats')
-  .description('ルーチン実行の統計情報を表示')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-d, --days <number>', '過去何日間の統計を表示するか', '7')
+  .description('Display routine execution statistics')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-d, --days <number>', 'Number of days to display statistics for', '7')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
@@ -319,20 +319,20 @@ routineCommand
     await executionHistory.displaySummary(parseInt(options.days));
   });
 
-// ルーチン削除
+// Delete routine
 routineCommand
   .command('delete')
   .alias('remove')
   .alias('rm')
-  .description('思考ルーチンを削除する')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-i, --id <routineId>', '削除するルーチンのID (指定しない場合は一覧から選択)')
+  .description('Delete a thought routine')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-i, --id <routineId>', 'ID of the routine to delete (if not specified, select from list)')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -341,21 +341,21 @@ routineCommand
     await routineCreator.deleteRoutine(options.id);
   });
 
-// 優先度管理コマンド
+// Priority management command
 program
   .command('priority')
-  .description('ルーチンの優先度設定を管理')
-  .option('-u, --api-url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-d, --directory <directory>', '作業ディレクトリ', '.')
-  .option('--show', '現在の優先度設定を表示')
-  .option('--set <routineId:priority>', 'ルーチンの優先度を設定 (例: abc123:8)')
-  .option('--weight <routineId:weight>', 'ルーチンの重みを設定 (例: abc123:1.5)')
+  .description('Manage routine priority settings')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-d, --directory <directory>', 'Working directory', '.')
+  .option('--show', 'Display current priority settings')
+  .option('--set <routineId:priority>', 'Set routine priority (e.g., abc123:8)')
+  .option('--weight <routineId:weight>', 'Set routine weight (e.g., abc123:1.5)')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -363,7 +363,7 @@ program
     const routineManager = new RoutineManager(options.apiUrl, options.directory, authManager);
     
     if (options.show) {
-      console.log(chalk.blue('📊 ルーチン優先度設定を表示します...'));
+      console.log(chalk.blue('📊 Displaying routine priority settings...'));
       const routines = await routineManager.fetchActiveRoutines();
       routineManager.updateRoutinePriorities(routines);
       await routineManager.getRoutinePriorityInfo();
@@ -375,7 +375,7 @@ program
       if (routineId && priority) {
         routineManager.adjustPriority(routineId, parseInt(priority));
       } else {
-        console.log(chalk.red('❌ 形式が正しくありません。例: --set abc123:8'));
+        console.log(chalk.red('❌ Invalid format. Example: --set abc123:8'));
       }
       return;
     }
@@ -385,13 +385,13 @@ program
       if (routineId && weight) {
         routineManager.adjustWeight(routineId, parseFloat(weight));
       } else {
-        console.log(chalk.red('❌ 形式が正しくありません。例: --weight abc123:1.5'));
+        console.log(chalk.red('❌ Invalid format. Example: --weight abc123:1.5'));
       }
       return;
     }
     
-    // デフォルト：優先度設定を表示
-    console.log(chalk.blue('📊 ルーチン優先度設定を表示します...'));
+    // Default: display priority settings
+    console.log(chalk.blue('📊 Displaying routine priority settings...'));
     const routines = await routineManager.fetchActiveRoutines();
     routineManager.updateRoutinePriorities(routines);
     await routineManager.getRoutinePriorityInfo();
@@ -399,25 +399,25 @@ program
 
 program
   .command('schedule')
-  .description('定期実行でAPIを叩き続ける')
-  .option('-u, --url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-i, --interval <seconds>', '実行間隔（秒）', '30')
-  .option('-e, --endpoints <endpoints>', 'カンマ区切りのエンドポイント', '/api/todos,/api/routines,/api/messages')
-  .option('-c, --concurrent <number>', '並列実行数', '3')
+  .description('Continuously hit APIs with scheduled execution')
+  .option('-u, --url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-i, --interval <seconds>', 'Execution interval (seconds)', '30')
+  .option('-e, --endpoints <endpoints>', 'Comma-separated endpoints', '/api/todos,/api/routines,/api/messages')
+  .option('-c, --concurrent <number>', 'Number of concurrent executions', '3')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.url);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
-    console.log(chalk.blue('🚀 定期実行モードを開始します...'));
-    console.log(chalk.gray(`ベースURL: ${options.url}`));
-    console.log(chalk.gray(`実行間隔: ${options.interval}秒`));
-    console.log(chalk.gray(`エンドポイント: ${options.endpoints}`));
-    console.log(chalk.gray(`並列実行数: ${options.concurrent}`));
+    console.log(chalk.blue('🚀 Starting scheduled execution mode...'));
+    console.log(chalk.gray(`Base URL: ${options.url}`));
+    console.log(chalk.gray(`Execution interval: ${options.interval} seconds`));
+    console.log(chalk.gray(`Endpoints: ${options.endpoints}`));
+    console.log(chalk.gray(`Concurrent executions: ${options.concurrent}`));
     
     const endpoints = options.endpoints.split(',').map((ep: string) => ep.trim());
     await startScheduler({
@@ -431,11 +431,11 @@ program
 
 program
   .command('parallel')
-  .description('並列でAPIリクエストを実行')
-  .option('-u, --url <url>', 'APIのベースURL', 'https://api.aireer.work')
-  .option('-e, --endpoints <endpoints>', 'カンマ区切りのエンドポイント', '/api/todos,/api/routines,/api/messages')
-  .option('-c, --count <number>', '各エンドポイントの実行回数', '5')
-  .option('-t, --threads <number>', '並列実行数', '10')
+  .description('Execute API requests in parallel')
+  .option('-u, --url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-e, --endpoints <endpoints>', 'Comma-separated endpoints', '/api/todos,/api/routines,/api/messages')
+  .option('-c, --count <number>', 'Number of executions per endpoint', '5')
+  .option('-t, --threads <number>', 'Number of parallel executions', '10')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.url);
     
@@ -445,11 +445,11 @@ program
       process.exit(1);
     }
 
-    console.log(chalk.blue('⚡ 並列実行モードを開始します...'));
-    console.log(chalk.gray(`ベースURL: ${options.url}`));
-    console.log(chalk.gray(`エンドポイント: ${options.endpoints}`));
-    console.log(chalk.gray(`実行回数: ${options.count}`));
-    console.log(chalk.gray(`並列実行数: ${options.threads}`));
+    console.log(chalk.blue('⚡ Starting parallel execution mode...'));
+    console.log(chalk.gray(`Base URL: ${options.url}`));
+    console.log(chalk.gray(`Endpoints: ${options.endpoints}`));
+    console.log(chalk.gray(`Execution count: ${options.count}`));
+    console.log(chalk.gray(`Parallel executions: ${options.threads}`));
     
     const endpoints = options.endpoints.split(',').map((ep: string) => ep.trim());
     await runParallelRequests({
@@ -464,23 +464,23 @@ program
 program
   .command('interactive')
   .alias('i')
-  .description('インタラクティブモードで設定')
+  .description('Configure with interactive mode')
   .action(async () => {
     displayCompactLogo();
-    console.log(chalk.blue('🎯 インタラクティブモードを開始します...'));
+    console.log(chalk.blue('🎯 Starting interactive mode...'));
     await setupInteractiveMode();
   });
 
 program
   .command('health')
-  .description('APIの健康状態をチェック')
-  .option('-u, --url <url>', 'APIのベースURL', 'https://api.aireer.work')
+  .description('Check API health status')
+  .option('-u, --url <url>', 'API base URL', 'https://api.aireer.work')
   .action(async (options: any) => {
     const { checkApiHealth } = await import('./health.js');
     await checkApiHealth(options.url);
   });
 
-// デフォルトでhelpを表示
+// Display help by default
 if (process.argv.length <= 2) {
   displayLogo();
   program.help();

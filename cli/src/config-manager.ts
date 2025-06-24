@@ -22,7 +22,7 @@ export class ConfigManager {
   private config: Config;
 
   constructor() {
-    // ホームディレクトリに設定ファイルを保存
+    // Save configuration file in home directory
     this.configPath = path.join(os.homedir(), '.aireer-config.json');
     this.config = this.loadConfig();
   }
@@ -34,10 +34,10 @@ export class ConfigManager {
         return JSON.parse(data);
       }
     } catch (error) {
-      console.warn(chalk.yellow('⚠️  設定ファイルの読み込みに失敗しました'));
+      console.warn(chalk.yellow('⚠️  Failed to load configuration file'));
     }
     
-    // デフォルト設定
+    // Default configuration
     return {
       apiUrl: 'https://api.aireer.work',
       llmMode: 'api'
@@ -48,7 +48,7 @@ export class ConfigManager {
     try {
       fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2));
     } catch (error) {
-      console.error(chalk.red('❌ 設定ファイルの保存に失敗しました:'), error);
+      console.error(chalk.red('❌ Failed to save configuration file:'), error);
     }
   }
 
@@ -121,35 +121,35 @@ export class ConfigManager {
   }
 
   displayConfig(): void {
-    console.log(chalk.blue('\n📋 現在の設定'));
+    console.log(chalk.blue('\n📋 Current Configuration'));
     console.log(chalk.gray('━'.repeat(30)));
     console.log(`API URL: ${chalk.cyan(this.config.apiUrl)}`);
-    console.log(`LLMモード: ${chalk.cyan(this.config.llmMode)}`);
+    console.log(`LLM Mode: ${chalk.cyan(this.config.llmMode)}`);
     
     if (this.config.llmMode === 'gemini-direct') {
       const hasKey = !!this.config.geminiApiKey;
-      console.log(`Gemini APIキー: ${hasKey ? chalk.green('✅ 設定済み') : chalk.red('❌ 未設定')}`);
+      console.log(`Gemini API Key: ${hasKey ? chalk.green('✅ Configured') : chalk.red('❌ Not set')}`);
     }
     
     if (this.config.user) {
-      console.log(`ユーザー: ${chalk.green(this.config.user.name)} (${this.config.user.email})`);
-      console.log(`認証状態: ${chalk.green('✅ ログイン済み')}`);
+      console.log(`User: ${chalk.green(this.config.user.name)} (${this.config.user.email})`);
+      console.log(`Authentication Status: ${chalk.green('✅ Logged in')}`);
     } else {
-      console.log(`認証状態: ${chalk.red('❌ 未ログイン')}`);
+      console.log(`Authentication Status: ${chalk.red('❌ Not logged in')}`);
     }
     console.log();
   }
 
-  // Gemini APIキーの設定ガイド
+  // Gemini API key setup guide
   displayGeminiSetupGuide(): void {
-    console.log(chalk.blue('\n🔑 Gemini API設定ガイド'));
+    console.log(chalk.blue('\n🔑 Gemini API Setup Guide'));
     console.log(chalk.gray('━'.repeat(40)));
-    console.log(chalk.white('1. Google AI Studioにアクセス'));
+    console.log(chalk.white('1. Access Google AI Studio'));
     console.log(chalk.cyan('   https://makersuite.google.com/app/apikey'));
-    console.log(chalk.white('2. 新しいAPIキーを作成'));
-    console.log(chalk.white('3. 以下のコマンドでAPIキーを設定:'));
+    console.log(chalk.white('2. Create a new API key'));
+    console.log(chalk.white('3. Set the API key with the following command:'));
     console.log(chalk.cyan('   aireer config --gemini-key YOUR_API_KEY'));
-    console.log(chalk.white('4. LLMモードをGemini Directに切り替え:'));
+    console.log(chalk.white('4. Switch LLM mode to Gemini Direct:'));
     console.log(chalk.cyan('   aireer config --llm-mode gemini-direct'));
     console.log();
   }

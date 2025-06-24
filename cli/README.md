@@ -1,67 +1,67 @@
 # Aireer CLI
 
-> 完全自律型AIサービス「aireer」のCLIツール
+> CLI tool for the fully autonomous AI service "aireer"
 
 [![npm version](https://badge.fury.io/js/aireer-cli.svg)](https://badge.fury.io/js/aireer-cli)
 [![Node.js Version](https://img.shields.io/node/v/aireer-cli.svg)](https://nodejs.org/)
 
-## 📖 概要
+## 📖 Overview
 
-Aireer CLIは、並列実行と定期実行でAPIを叩き続けるCLIツールです。思考ルーチンを取得して優先度に基づいて自動実行する完全自律型のタスク実行システムを提供します。
+Aireer CLI is a CLI tool that continuously hits APIs with parallel and scheduled execution. It provides a fully autonomous task execution system that retrieves thought routines and automatically executes them based on priority.
 
-## 🚀 インストール
+## 🚀 Installation
 
-### npm経由でインストール
+### Install via npm
 
 ```bash
 npm install -g aireer-cli
 ```
 
-### 必要環境
+### Requirements
 
-- Node.js 18.0.0以上
+- Node.js 18.0.0 or higher
 
-## 📋 使用方法
+## 📋 Usage
 
-### 基本コマンド
+### Basic Commands
 
-#### ログイン
+#### Login
 ```bash
 aireer login
 ```
 
-#### アカウント作成
+#### Account Creation
 ```bash
 aireer register
 ```
 
-#### 設定管理
+#### Configuration Management
 ```bash
-# 現在の設定を表示
+# Display current configuration
 aireer config --show
 
-# LLMモードを設定
+# Set LLM mode
 aireer config --llm-mode api
 
-# Gemini APIキーを設定
+# Set Gemini API key
 aireer config --gemini-key "YOUR_API_KEY"
 
-# Gemini API接続テスト
+# Test Gemini API connection
 aireer config --gemini-test
 
-# Gemini API設定ガイドを表示
+# Display Gemini API setup guide
 aireer config --gemini-guide
 ```
 
-#### 自律実行モード（メイン機能）
+#### Autonomous Execution Mode (Main Feature)
 ```bash
-# 基本実行
+# Basic execution
 aireer autonomous
 
-# エイリアス
+# Alias
 aireer auto
 
-# オプション付き実行
+# Execution with options
 aireer autonomous \
   --api-url https://api.aireer.work \
   --directory ./workspace \
@@ -69,87 +69,87 @@ aireer autonomous \
   --max-executions 3
 ```
 
-### その他のコマンド
+### Other Commands
 
-#### 並列実行
+#### Parallel Execution
 ```bash
 aireer parallel
 ```
 
-#### インタラクティブモード
+#### Interactive Mode
 ```bash
 aireer interactive
 ```
 
-#### ルーチン管理
+#### Routine Management
 ```bash
-# ルーチン作成
+# Create routine
 aireer routine create
 
-# ルーチン一覧
+# List routines
 aireer routine list
 
-# ルーチン削除
+# Delete routine
 aireer routine delete <routine-id>
 
-# ルーチン実行
+# Execute routine
 aireer routine run <routine-id>
 ```
 
-#### スケジューラー
+#### Scheduler
 ```bash
 aireer scheduler
 ```
 
-## ⚙️ 設定
+## ⚙️ Configuration
 
-### LLMモード
+### LLM Mode
 
-- `api`: aireer APIサーバー経由でLLMを使用
-- `gemini-direct`: Gemini APIに直接接続
+- `api`: Use LLM via aireer API server
+- `gemini-direct`: Connect directly to Gemini API
 
-### Gemini Direct モード
+### Gemini Direct Mode
 
-Gemini APIを直接使用する場合：
+When using Gemini API directly:
 
-1. [Google AI Studio](https://makersuite.google.com/app/apikey)でAPIキーを取得
-2. APIキーを設定: `aireer config --gemini-key "YOUR_API_KEY"`
-3. LLMモードを変更: `aireer config --llm-mode gemini-direct`
+1. Get API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Set API key: `aireer config --gemini-key "YOUR_API_KEY"`
+3. Change LLM mode: `aireer config --llm-mode gemini-direct`
 
-## 🛠️ 開発
+## 🛠️ Development
 
-### ローカル開発
+### Local Development
 
 ```bash
-# リポジトリをクローン
+# Clone repository
 git clone https://github.com/your-username/aireer-cli.git
 cd aireer-cli
 
-# 依存関係をインストール
+# Install dependencies
 npm install
 
-# ビルド
+# Build
 npm run build
 
-# 開発モード
+# Development mode
 npm run dev
 ```
 
-### ビルド
+### Build
 
 ```bash
 npm run build
 ```
 
-## 📄 ライセンス
+## 📄 License
 
 MIT License
 
-## 🤝 コントリビューション
+## 🤝 Contributing
 
-プルリクエストやイシューの報告を歓迎します。
+Pull requests and issue reports are welcome.
 
-## 🔗 関連リンク
+## 🔗 Related Links
 
 - [aireer API Documentation](https://api.aireer.work/docs)
 - [GitHub Repository](https://github.com/your-username/aireer-cli)

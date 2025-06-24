@@ -33,35 +33,35 @@ export class RoutineCreator {
   }
 
   async createThinkingRoutine(): Promise<void> {
-    console.log(chalk.blue('🧠 思考ルーチンを作成します'));
-    console.log(chalk.gray('以下の質問に答えて、あなたの思考パターンをルーチン化しましょう\n'));
+    console.log(chalk.blue('🧠 Creating thought routine'));
+    console.log(chalk.gray('Answer the following questions to routinize your thought patterns\n'));
 
     try {
-      // 基本情報の入力
+      // Input basic information
       const basicInfo = await inquirer.prompt([
         {
           type: 'input',
           name: 'name',
-          message: 'ルーチンの名前を入力してください:',
+          message: 'Enter routine name:',
           validate: (input: string) => {
-            return input.trim().length > 0 ? true : 'ルーチン名は必須です';
+            return input.trim().length > 0 ? true : 'Routine name is required';
           }
         },
         {
           type: 'input',
           name: 'description',
-          message: 'ルーチンの説明を入力してください (例: 朝の思考整理、プロジェクト分析):',
-          default: '思考ルーチン'
+          message: 'Enter routine description (e.g., morning thought organization, project analysis):',
+          default: 'Thought routine'
         },
         {
           type: 'confirm',
           name: 'isActive',
-          message: '作成後すぐにアクティブ化しますか？',
+          message: 'Activate immediately after creation?',
           default: true
         }
       ]);
 
-      // 思考ステップの定義
+      // Define thinking steps
       const steps = await this.defineThinkingSteps();
 
       const routineData: CreateRoutineData = {
@@ -71,40 +71,40 @@ export class RoutineCreator {
         steps: steps
       };
 
-      // ルーチンの確認
+      // Confirm routine
       await this.confirmRoutine(routineData);
 
-      // ルーチンを作成
+      // Create routine
       await this.submitRoutine(routineData);
 
     } catch (error) {
       if (error instanceof Error && error.name === 'ExitPromptError') {
-        console.log(chalk.yellow('\n操作がキャンセルされました'));
+        console.log(chalk.yellow('\nOperation cancelled'));
       } else {
-        console.error(chalk.red('ルーチン作成でエラーが発生しました:'), error);
+        console.error(chalk.red('Error occurred during routine creation:'), error);
       }
     }
   }
 
   private async defineThinkingSteps(): Promise<RoutineStep[]> {
-    console.log(chalk.cyan('\n🔄 思考ステップを定義しましょう'));
-    console.log(chalk.gray('思考プロセスを分解して、各ステップを定義します\n'));
+    console.log(chalk.cyan('\n🔄 Let\'s define thinking steps'));
+    console.log(chalk.gray('Break down the thinking process and define each step\n'));
 
     const steps: RoutineStep[] = [];
     let stepOrder = 0;
 
-    // 事前定義されたテンプレート選択
+    // Pre-defined template selection
     const templateChoice = await inquirer.prompt([
       {
         type: 'list',
         name: 'template',
-        message: 'テンプレートを選択するか、カスタムで作成しますか？',
+        message: 'Choose a template or create custom?',
         choices: [
-          { name: '📊 分析思考テンプレート - 問題を構造化して分析', value: 'analysis' },
-          { name: '💡 創造思考テンプレート - アイデア発想とブレインストーミング', value: 'creative' },
-          { name: '🎯 意思決定テンプレート - 選択肢を評価して決定', value: 'decision' },
-          { name: '🔍 問題解決テンプレート - 課題特定から解決まで', value: 'problem-solving' },
-          { name: '🔧 カスタム - 独自の思考ステップを定義', value: 'custom' }
+          { name: '📊 Analytical Thinking Template - Structure and analyze problems', value: 'analysis' },
+          { name: '💡 Creative Thinking Template - Idea generation and brainstorming', value: 'creative' },
+          { name: '🎯 Decision Making Template - Evaluate options and make decisions', value: 'decision' },
+          { name: '🔍 Problem Solving Template - From issue identification to resolution', value: 'problem-solving' },
+          { name: '🔧 Custom - Define your own thinking steps', value: 'custom' }
         ]
       }
     ]);
@@ -126,12 +126,12 @@ export class RoutineCreator {
         return await this.defineCustomSteps();
     }
 
-    // テンプレートをカスタマイズするか確認
+    // Confirm template customization
     const customizeChoice = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'customize',
-        message: 'テンプレートをカスタマイズしますか？',
+        message: 'Would you like to customize the template?',
         default: false
       }
     ]);

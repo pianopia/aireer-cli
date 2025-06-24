@@ -1,28 +1,28 @@
 # aireer-cli
 
-完全自律型AIサービス「aireer」のCLIツール - 思考ルーチンを構造化して自動実行する並列・定期実行ツールです。
+A CLI tool for the fully autonomous AI service "aireer" - a parallel and scheduled execution tool that structures thought routines for automatic execution.
 
-## 📦 インストール
+## 📦 Installation
 
-### インストール方法（推奨）
+### Installation Method (Recommended)
 
 ```bash
-# 最新版をインストール
+# Install the latest version
 npm install -g @pianopia/aireer-cli
 
-# 特定のバージョンをインストール  
+# Install a specific version  
 npm install -g @pianopia/aireer-cli#v1.0.0
 ```
 
-### 方法2: GitHub Packagesからインストール
+### Method 2: Install from GitHub Packages
 
-### プロジェクトの依存関係として追加
+### Add as Project Dependency
 
 ```bash
-# package.jsonに追加（GitHubから直接）
+# Add to package.json (directly from GitHub)
 npm install @pianopia/aireer-cli
 
-# または GitHub Packagesから
+# Or from GitHub Packages
 npm install @pianopia/aireer-cli
 ```
 
@@ -34,182 +34,182 @@ npm install @pianopia/aireer-cli
 }
 ```
 
-## 🚀 クイックスタート
+## 🚀 Quick Start
 
-### 1. アカウント作成・ログイン
+### 1. Account Creation/Login
 
 ```bash
-# 新規アカウント作成
+# Create new account
 aireer register
 
-# ログイン
+# Login
 aireer login
 ```
 
-### 2. 思考ルーチンの作成
+### 2. Create Thought Routines
 
 ```bash
-# インタラクティブなルーチン作成
+# Interactive routine creation
 aireer routine create
 ```
 
-### 3. 自律モードで実行
+### 3. Execute in Autonomous Mode
 
 ```bash
-# 完全自律モードで実行
+# Execute in fully autonomous mode
 aireer autonomous
 ```
 
-## 🎯 主な機能
+## 🎯 Main Features
 
-### ✨ 思考ルーチン機能
+### ✨ Thought Routine Features
 
-あなたの思考パターンを構造化してルーチンとして登録し、AI自律モードで自動実行できます。
+Structure your thought patterns and register them as routines for automatic execution in AI autonomous mode.
 
-- **📊 分析思考テンプレート**: 問題や状況を構造化して分析
-- **💡 創造思考テンプレート**: アイデア発想とブレインストーミング
-- **🎯 意思決定テンプレート**: 選択肢を評価して最適な決定
-- **🔍 問題解決テンプレート**: 課題特定から解決まで体系的にアプローチ
+- **📊 Analytical Thinking Template**: Structure and analyze problems or situations
+- **💡 Creative Thinking Template**: Idea generation and brainstorming
+- **🎯 Decision Making Template**: Evaluate options and make optimal decisions
+- **🔍 Problem Solving Template**: Systematic approach from issue identification to resolution
 
-### 🤖 自律実行モード
+### 🤖 Autonomous Execution Mode
 
-登録した思考ルーチンを優先度に基づいて自動実行します：
+Automatically execute registered thought routines based on priority:
 
-- アクティブなルーチンの自動取得
-- 優先度と重みに基づく実行順序管理
-- LLMによる高度な思考プロセス実行
-- 実行結果の詳細記録とモニタリング
+- Automatic retrieval of active routines
+- Execution order management based on priority and weight
+- Advanced thought process execution via LLM
+- Detailed recording and monitoring of execution results
 
-### 📊 実行履歴とモニタリング
+### 📊 Execution History and Monitoring
 
 ```bash
-# 実行履歴の表示
+# Display execution history
 aireer routine history
 
-# 統計情報の確認
+# Check statistics
 aireer routine stats
 ```
 
-## 🛠️ 利用可能なコマンド
+## 🛠️ Available Commands
 
-| コマンド | 説明 |
-|---------|-----|
-| `aireer register` | 新規アカウント作成 |
-| `aireer login` | ログイン |
-| `aireer logout` | ログアウト |
-| `aireer routine create` | 新しい思考ルーチンを作成 |
-| `aireer routine list` | 登録済みルーチンの一覧表示 |
-| `aireer routine history` | 実行履歴の表示 |
-| `aireer routine stats` | 実行統計の表示 |
-| `aireer autonomous` | 完全自律モードで実行 |
-| `aireer config` | 設定の表示・変更 |
-| `aireer config --gemini-guide` | Gemini API設定ガイド |
+| Command | Description |
+|---------|-------------|
+| `aireer register` | Create new account |
+| `aireer login` | Login |
+| `aireer logout` | Logout |
+| `aireer routine create` | Create new thought routine |
+| `aireer routine list` | Display list of registered routines |
+| `aireer routine history` | Display execution history |
+| `aireer routine stats` | Display execution statistics |
+| `aireer autonomous` | Execute in fully autonomous mode |
+| `aireer config` | Display/modify settings |
+| `aireer config --gemini-guide` | Gemini API setup guide |
 
-## ⚙️ 設定
+## ⚙️ Configuration
 
-### LLMモードの設定
+### LLM Mode Configuration
 
 ```bash
-# API経由でLLMを使用（デフォルト）
+# Use LLM via API (default)
 aireer config --llm-mode api
 
-# Gemini APIを直接使用
+# Use Gemini API directly
 aireer config --llm-mode gemini-direct
 aireer config --gemini-key YOUR_API_KEY
 ```
 
-### Gemini API設定
+### Gemini API Configuration
 
 ```bash
-# 設定ガイドを表示
+# Display setup guide
 aireer config --gemini-guide
 
-# APIキーを設定
+# Set API key
 aireer config --gemini-key AIza...
 
-# 接続テスト
+# Test connection
 aireer config --gemini-test
 ```
 
-## 🔧 開発者向け情報
+## 🔧 Developer Information
 
-### 必要要件
+### Requirements
 
 - Node.js >= 18.0.0
-- npm または yarn
+- npm or yarn
 
-### ローカル開発
+### Local Development
 
 ```bash
-# リポジトリをクローン
+# Clone repository
 git clone https://github.com/pianopia/aireer-cli.git
 cd aireer-cli
 
-# 依存関係をインストール
+# Install dependencies
 cd cli && npm install
 
-# 開発モードで実行
+# Run in development mode
 npm run dev
 
-# ビルド
+# Build
 npm run build
 ```
 
-### パッケージング
+### Packaging
 
 ```bash
-# プロジェクトルートでパッケージをビルド
+# Build package in project root
 npm run build
 npm pack
 
-# ローカルでテストインストール
+# Test install locally
 npm install -g ./pianopia-aireer-cli-1.0.0.tgz
 ```
 
-### 配布方法
+### Distribution Method
 
-#### GitHub Packagesへの手動公開
+#### Manual Publishing to GitHub Packages
 
 ```bash
-# GitHub Personal Access Token (packages:write権限が必要) で認証
+# Authenticate with GitHub Personal Access Token (requires packages:write permission)
 npm login --registry=https://npm.pkg.github.com
 
-# パッケージを公開
+# Publish package
 npm publish
 ```
 
-#### リリース作成による自動公開
+#### Automatic Publishing via Release Creation
 
 ```bash
-# タグを作成してプッシュ
+# Create and push tag
 git tag v1.0.0
 git push origin v1.0.0
 
-# または GitHub上でリリースを作成
-# → GitHub Actionsが自動的にパッケージを公開
+# Or create release on GitHub
+# → GitHub Actions will automatically publish the package
 ```
 
-## 📚 詳細ドキュメント
+## 📚 Detailed Documentation
 
-思考ルーチン機能の詳細については、[README-ROUTINE.md](cli/README-ROUTINE.md)をご覧ください。
+For details on thought routine features, see [README-ROUTINE.md](cli/README-ROUTINE.md).
 
-## 🌐 APIエンドポイント
+## 🌐 API Endpoints
 
-- **本番環境**: `https://api.aireer.work`
-- **ローカル開発**: `http://localhost:3000`
+- **Production**: `https://api.aireer.work`
+- **Local Development**: `http://localhost:3000`
 
-## 📄 ライセンス
+## 📄 License
 
 MIT License
 
-## 🤝 コントリビューション
+## 🤝 Contribution
 
-プルリクエストやイシューの報告を歓迎します。
+Pull requests and issue reports are welcome.
 
-## 🆘 サポート
+## 🆘 Support
 
 - [GitHub Issues](https://github.com/pianopia/aireer-cli/issues)
-- [公式サイト](https://aireer.work)
+- [Official Site](https://aireer.work)
 
 ---
 

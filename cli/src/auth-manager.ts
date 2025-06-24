@@ -17,7 +17,7 @@ export class AuthManager {
   }
 
   async login(): Promise<boolean> {
-    console.log(chalk.blue('\n🔐 aireerにログインします'));
+    console.log(chalk.blue('\n🔐 Logging into aireer'));
     console.log(chalk.gray('━'.repeat(30)));
 
     try {
@@ -25,24 +25,24 @@ export class AuthManager {
         {
           type: 'input',
           name: 'email',
-          message: 'メールアドレス:',
+          message: 'Email address:',
           validate: (input: string) => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(input) || 'Valid なメールアドレスを入力してください';
+            return emailRegex.test(input) || 'Please enter a valid email address';
           }
         },
         {
           type: 'password',
           name: 'password',
-          message: 'パスワード:',
+          message: 'Password:',
           mask: '*',
           validate: (input: string) => {
-            return input.length >= 6 || 'パスワードは6文字以上である必要があります';
+            return input.length >= 6 || 'Password must be at least 6 characters';
           }
         }
       ]);
 
-      const spinner = ora('ログイン中...').start();
+      const spinner = ora('Logging in...').start();
 
       try {
         const response = await this.apiClient.post('/api/auth/login', {
@@ -54,27 +54,27 @@ export class AuthManager {
           this.configManager.setToken(response.data.token);
           this.configManager.setUser(response.data.user);
           
-          spinner.succeed(chalk.green('✅ ログインに成功しました！'));
-          console.log(chalk.gray(`ようこそ、${response.data.user.name}さん！`));
+          spinner.succeed(chalk.green('✅ Login successful!'));
+          console.log(chalk.gray(`Welcome, ${response.data.user.name}!`));
           return true;
         } else {
-          spinner.fail(chalk.red('❌ ログインに失敗しました'));
+          spinner.fail(chalk.red('❌ Login failed'));
           console.log(chalk.red(response.message || 'Unknown error'));
           return false;
         }
       } catch (error: any) {
-        spinner.fail(chalk.red('❌ ログインに失敗しました'));
+        spinner.fail(chalk.red('❌ Login failed'));
         console.log(chalk.red(error.message));
         return false;
       }
     } catch (error) {
-      console.log(chalk.yellow('\n⏹️  ログインがキャンセルされました'));
+      console.log(chalk.yellow('\n⏹️  Login cancelled'));
       return false;
     }
   }
 
   async register(): Promise<boolean> {
-    console.log(chalk.blue('\n📝 aireerアカウントを作成します'));
+    console.log(chalk.blue('\n📝 Creating aireer account'));
     console.log(chalk.gray('━'.repeat(30)));
 
     try {
@@ -82,41 +82,41 @@ export class AuthManager {
         {
           type: 'input',
           name: 'name',
-          message: '名前:',
+          message: 'Name:',
           validate: (input: string) => {
-            return input.trim().length > 0 || '名前を入力してください';
+            return input.trim().length > 0 || 'Please enter your name';
           }
         },
         {
           type: 'input',
           name: 'email',
-          message: 'メールアドレス:',
+          message: 'Email address:',
           validate: (input: string) => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(input) || 'Valid なメールアドレスを入力してください';
+            return emailRegex.test(input) || 'Please enter a valid email address';
           }
         },
         {
           type: 'password',
           name: 'password',
-          message: 'パスワード:',
+          message: 'Password:',
           mask: '*',
           validate: (input: string) => {
-            return input.length >= 6 || 'パスワードは6文字以上である必要があります';
+            return input.length >= 6 || 'Password must be at least 6 characters';
           }
         },
         {
           type: 'password',
           name: 'confirmPassword',
-          message: 'パスワード（確認）:',
+          message: 'Confirm password:',
           mask: '*',
           validate: (input: string, answers: any) => {
-            return input === answers.password || 'パスワードが一致しません';
+            return input === answers.password || 'Passwords do not match';
           }
         }
       ]);
 
-      const spinner = ora('アカウントを作成中...').start();
+      const spinner = ora('Creating account...').start();
 
       try {
         const response = await this.apiClient.post('/api/auth/register', {
@@ -129,28 +129,28 @@ export class AuthManager {
           this.configManager.setToken(response.data.token);
           this.configManager.setUser(response.data.user);
           
-          spinner.succeed(chalk.green('✅ アカウント作成に成功しました！'));
-          console.log(chalk.gray(`ようこそ、${response.data.user.name}さん！`));
+          spinner.succeed(chalk.green('✅ Account created successfully!'));
+          console.log(chalk.gray(`Welcome, ${response.data.user.name}!`));
           return true;
         } else {
-          spinner.fail(chalk.red('❌ アカウント作成に失敗しました'));
+          spinner.fail(chalk.red('❌ Account creation failed'));
           console.log(chalk.red(response.message || 'Unknown error'));
           return false;
         }
       } catch (error: any) {
-        spinner.fail(chalk.red('❌ アカウント作成に失敗しました'));
+        spinner.fail(chalk.red('❌ Account creation failed'));
         console.log(chalk.red(error.message));
         return false;
       }
     } catch (error) {
-      console.log(chalk.yellow('\n⏹️  アカウント作成がキャンセルされました'));
+      console.log(chalk.yellow('\n⏹️  Account creation cancelled'));
       return false;
     }
   }
 
   async logout(): Promise<void> {
     this.configManager.clearAuth();
-    console.log(chalk.green('✅ ログアウトしました'));
+    console.log(chalk.green('✅ Logged out successfully'));
   }
 
   async checkAuthStatus(): Promise<boolean> {
@@ -165,16 +165,16 @@ export class AuthManager {
       const response = await apiClient.get('/api/auth/me');
       
       if (response.success) {
-        // ユーザー情報を更新
+        // Update user information
         this.configManager.setUser(response.data);
         return true;
       } else {
-        // トークンが無効
+        // Invalid token
         this.configManager.clearAuth();
         return false;
       }
     } catch (error) {
-      // トークンが無効
+      // Invalid token
       this.configManager.clearAuth();
       return false;
     }
@@ -189,17 +189,17 @@ export class AuthManager {
       return true;
     }
 
-    console.log(chalk.yellow('\n🔐 認証が必要です'));
+    console.log(chalk.yellow('\n🔐 Authentication required'));
     
     const { action } = await inquirer.prompt([
       {
         type: 'list',
         name: 'action',
-        message: '認証方法を選択してください:',
+        message: 'Choose authentication method:',
         choices: [
-          { name: 'ログイン', value: 'login' },
-          { name: '新規アカウント作成', value: 'register' },
-          { name: 'キャンセル', value: 'cancel' }
+          { name: 'Login', value: 'login' },
+          { name: 'Create new account', value: 'register' },
+          { name: 'Cancel', value: 'cancel' }
         ]
       }
     ]);

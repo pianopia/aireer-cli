@@ -16,7 +16,7 @@ export function displayLogo(): void {
         ╩ ╩ ┴ ┴└─ └─┘ └─┘ ┴└─
   `;
 
-  const subtitle = '完全自律型AIサービス';
+  const subtitle = 'Fully Autonomous AI Service';
   const version = 'v1.0.0';
 
   console.log(chalk.cyan.bold(modernLogo));
@@ -32,7 +32,7 @@ export function displayMinimalLogo(): void {
   console.log(chalk.cyan.bold('     ╔═╗ ┬ ┬─┐ ┌─┐ ┌─┐ ┬─┐'));
   console.log(chalk.cyan.bold('     ╠═╣ │ ├┬┘ ├┤  ├┤  ├┬┘'));
   console.log(chalk.cyan.bold('     ╩ ╩ ┴ ┴└─ └─┘ └─┘ ┴└─'));
-  console.log(chalk.blue('           完全自律型AI'));
+  console.log(chalk.blue('      Fully Autonomous AI'));
   console.log();
 }
 
@@ -44,6 +44,6 @@ export function displayCompactLogo(): void {
   `;
   
   console.log(chalk.cyan.bold(compactLogo));
-  console.log(chalk.blue('    完全自律型AIサービス'));
+  console.log(chalk.blue('  Fully Autonomous AI Service'));
   console.log();
 } 
