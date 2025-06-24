@@ -86,6 +86,55 @@ export class RoutineCreator {
     }
   }
 
+  async createRoutineNonInteractive(params: {
+    name: string;
+    description: string;
+    template: string;
+    isActive: boolean;
+    skipConfirmation?: boolean;
+  }): Promise<void> {
+    try {
+      console.log(chalk.blue(`🧠 Creating routine: ${params.name} (non-interactive mode)`));
+      
+      // Get template steps
+      let steps: RoutineStep[];
+      switch (params.template) {
+        case 'analysis':
+          steps = this.getAnalysisTemplate();
+          break;
+        case 'creative':
+          steps = this.getCreativeTemplate();
+          break;
+        case 'decision':
+          steps = this.getDecisionTemplate();
+          break;
+        case 'problem-solving':
+          steps = this.getProblemSolvingTemplate();
+          break;
+        default:
+          throw new Error(`Invalid template: ${params.template}. Valid templates: analysis, creative, decision, problem-solving`);
+      }
+
+      const routineData: CreateRoutineData = {
+        name: params.name,
+        description: params.description,
+        isActive: params.isActive,
+        steps: steps
+      };
+
+      // Skip confirmation if requested
+      if (!params.skipConfirmation) {
+        await this.confirmRoutine(routineData);
+      }
+
+      // Create routine
+      await this.submitRoutine(routineData);
+
+    } catch (error) {
+      console.error(chalk.red('Error occurred during routine creation:'), error);
+    }
+  }
+
   private async defineThinkingSteps(): Promise<RoutineStep[]> {
     console.log(chalk.cyan('\n🔄 Let\'s define thinking steps'));
     console.log(chalk.gray('Break down the thinking process and define each step\n'));
@@ -477,17 +526,17 @@ export class RoutineCreator {
     }
   }
 
-  async deleteRoutine(routineId?: string): Promise<void> {
+  async deleteRoutine(routineId?: string, skipConfirmation?: boolean): Promise<void> {
     try {
       let targetRoutineId = routineId;
       
       // ルーチンIDが指定されていない場合、一覧から選択
       if (!targetRoutineId) {
-        console.log(chalk.blue('🗑️  削除するルーチンを選択してください'));
+        console.log(chalk.blue('🗑️  Please select a routine to delete'));
         targetRoutineId = await this.selectRoutineForDeletion();
         
         if (!targetRoutineId) {
-          console.log(chalk.yellow('削除がキャンセルされました'));
+          console.log(chalk.yellow('Deletion cancelled'));
           return;
         }
       }
@@ -495,15 +544,19 @@ export class RoutineCreator {
       // 削除対象のルーチン詳細を取得・表示
       const routineDetails = await this.getRoutineDetails(targetRoutineId);
       if (!routineDetails) {
-        console.log(chalk.red('❌ 指定されたルーチンが見つかりません'));
+        console.log(chalk.red('❌ Specified routine not found'));
         return;
       }
 
-      // 削除確認
-      const confirmed = await this.confirmDeletion(routineDetails);
-      if (!confirmed) {
-        console.log(chalk.yellow('削除がキャンセルされました'));
-        return;
+      // 削除確認 (非対話式モードの場合はスキップ)
+      if (!skipConfirmation) {
+        const confirmed = await this.confirmDeletion(routineDetails);
+        if (!confirmed) {
+          console.log(chalk.yellow('Deletion cancelled'));
+          return;
+        }
+      } else {
+        console.log(chalk.blue(`🗑️  Deleting routine: ${routineDetails.name} (non-interactive mode)`));
       }
 
       // ルーチン削除実行
@@ -511,9 +564,9 @@ export class RoutineCreator {
 
     } catch (error) {
       if (error instanceof Error && error.name === 'ExitPromptError') {
-        console.log(chalk.yellow('\n操作がキャンセルされました'));
+        console.log(chalk.yellow('\nOperation cancelled'));
       } else {
-        console.error(chalk.red('❌ ルーチン削除でエラーが発生しました:'), error);
+        console.error(chalk.red('❌ Error occurred during routine deletion:'), error);
       }
     }
   }
@@ -523,27 +576,27 @@ export class RoutineCreator {
       const response = await this.apiClient.get('/api/routines');
       
       if (!response.success || !response.data || response.data.length === 0) {
-        console.log(chalk.yellow('削除可能なルーチンがありません'));
+        console.log(chalk.yellow('No routines available for deletion'));
         return undefined;
       }
 
       const choices = response.data.map((routine: any) => ({
-        name: `${routine.name} ${routine.isActive ? chalk.green('(アクティブ)') : chalk.gray('(非アクティブ)')} - ${routine.description}`,
+        name: `${routine.name} ${routine.isActive ? chalk.green('(Active)') : chalk.gray('(Inactive)')} - ${routine.description}`,
         value: routine.id,
         short: routine.name
       }));
 
       choices.push({
-        name: chalk.gray('キャンセル'),
+        name: chalk.gray('Cancel'),
         value: undefined,
-        short: 'キャンセル'
+        short: 'Cancel'
       });
 
       const selection = await inquirer.prompt([
         {
           type: 'list',
           name: 'routineId',
-          message: '削除するルーチンを選択してください:',
+          message: 'Select routine to delete:',
           choices: choices,
           pageSize: 10
         }
@@ -572,74 +625,50 @@ export class RoutineCreator {
   }
 
   private async confirmDeletion(routine: any): Promise<boolean> {
-    console.log(chalk.red('\n⚠️  削除対象のルーチン詳細'));
-    console.log(chalk.gray('━'.repeat(40)));
-    console.log(chalk.white(`名前: ${routine.name}`));
-    console.log(chalk.white(`説明: ${routine.description}`));
-    console.log(chalk.white(`状態: ${routine.isActive ? chalk.green('アクティブ') : chalk.gray('非アクティブ')}`));
-    console.log(chalk.white(`作成日: ${new Date(routine.createdAt).toLocaleString()}`));
+    console.log(chalk.red('\n⚠️  Routine to be deleted'));
+    console.log(chalk.gray('━'.repeat(30)));
+    console.log(chalk.white(`Name: ${routine.name}`));
+    console.log(chalk.white(`Description: ${routine.description}`));
+    console.log(chalk.white(`Status: ${routine.isActive ? chalk.green('Active') : chalk.gray('Inactive')}`));
+    console.log(chalk.white(`Steps: ${routine.steps?.length || 0}`));
     
-    if (routine.steps && routine.steps.length > 0) {
-      console.log(chalk.white(`ステップ数: ${routine.steps.length}`));
-      console.log(chalk.cyan('\nステップ詳細:'));
-      routine.steps.forEach((step: any, index: number) => {
-        console.log(chalk.gray(`  ${index + 1}. [${step.type}] ${step.content}`));
-      });
-    }
-
-    console.log(chalk.red('\n⚠️  警告: この操作は取り消せません！'));
+    console.log(chalk.red('\n⚠️  Warning: This operation cannot be undone!'));
     
     if (routine.isActive) {
-      console.log(chalk.yellow('⚠️  このルーチンはアクティブです。削除すると自律モードで実行されなくなります。'));
+      console.log(chalk.yellow('⚠️  This routine is active and will no longer run in autonomous mode.'));
     }
 
     const confirmation = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirmed',
-        message: chalk.red('本当にこのルーチンを削除しますか？'),
+        message: chalk.red('Are you sure you want to delete this routine?'),
         default: false
       }
     ]);
 
-    if (confirmation.confirmed) {
-      // 二重確認
-      const doubleConfirmation = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'routineName',
-          message: `確認のため、ルーチン名「${routine.name}」を入力してください:`,
-          validate: (input: string) => {
-            return input === routine.name ? true : 'ルーチン名が一致しません';
-          }
-        }
-      ]);
-
-      return doubleConfirmation.routineName === routine.name;
-    }
-
-    return false;
+    return confirmation.confirmed;
   }
 
   private async executeRoutineDeletion(routineId: string): Promise<void> {
     try {
-      console.log(chalk.blue('🗑️  ルーチンを削除中...'));
+      console.log(chalk.blue('🗑️  Deleting routine...'));
       
       const response = await this.apiClient.delete(`/api/routines/${routineId}`);
       
       if (response.success) {
-        console.log(chalk.green('✅ ルーチンが正常に削除されました'));
-        console.log(chalk.gray('ルーチンに関連する実行履歴も削除されました'));
+        console.log(chalk.green('✅ Routine deleted successfully'));
+        console.log(chalk.gray('Related execution history has also been deleted'));
       } else {
-        console.error(chalk.red('❌ ルーチンの削除に失敗しました:'), response.message || 'Unknown error');
+        console.error(chalk.red('❌ Failed to delete routine:'), response.message || 'Unknown error');
       }
     } catch (error: any) {
       if (error.message?.includes('404')) {
-        console.error(chalk.red('❌ 指定されたルーチンが見つかりません'));
+        console.error(chalk.red('❌ Specified routine not found'));
       } else if (error.message?.includes('403')) {
-        console.error(chalk.red('❌ このルーチンを削除する権限がありません'));
+        console.error(chalk.red('❌ You do not have permission to delete this routine'));
       } else {
-        console.error(chalk.red('❌ ルーチン削除でエラーが発生しました:'), error);
+        console.error(chalk.red('❌ Error occurred during routine deletion:'), error);
       }
     }
   }

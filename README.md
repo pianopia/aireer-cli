@@ -51,6 +51,9 @@ aireer login
 ```bash
 # Interactive routine creation
 aireer routine create
+
+# Non-interactive routine creation
+aireer routine create --name "Daily Analysis" --template analysis --description "Daily analysis routine" -y
 ```
 
 ### 3. Execute in Autonomous Mode
@@ -98,7 +101,9 @@ aireer routine stats
 | `aireer login` | Login |
 | `aireer logout` | Logout |
 | `aireer routine create` | Create new thought routine |
+| `aireer routine create --name "My Routine" --template analysis -y` | Create routine non-interactively |
 | `aireer routine list` | Display list of registered routines |
+| `aireer routine delete --id <routine-id> -y` | Delete routine without confirmation |
 | `aireer routine history` | Display execution history |
 | `aireer routine stats` | Display execution statistics |
 | `aireer autonomous` | Execute in fully autonomous mode |

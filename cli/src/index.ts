@@ -227,6 +227,12 @@ routineCommand
   .command('create')
   .description('Create a new thought routine')
   .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .option('-n, --name <name>', 'Routine name (for non-interactive mode)')
+  .option('-d, --description <description>', 'Routine description (for non-interactive mode)')
+  .option('-t, --template <template>', 'Template type: analysis, creative, decision, problem-solving (for non-interactive mode)')
+  .option('--active', 'Set routine as active (default: true for non-interactive mode)')
+  .option('--inactive', 'Set routine as inactive')
+  .option('-y, --yes', 'Skip confirmation prompts (non-interactive mode)')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
@@ -238,7 +244,20 @@ routineCommand
 
     displayCompactLogo();
     const routineCreator = new RoutineCreator(options.apiUrl, authManager);
-    await routineCreator.createThinkingRoutine();
+    
+    // Check if non-interactive mode
+    const isNonInteractive = options.name && options.template;
+    if (isNonInteractive) {
+      await routineCreator.createRoutineNonInteractive({
+        name: options.name,
+        description: options.description || 'Thought routine',
+        template: options.template,
+        isActive: options.inactive ? false : true,
+        skipConfirmation: options.yes
+      });
+    } else {
+      await routineCreator.createThinkingRoutine();
+    }
   });
 
 // Display routine list
@@ -327,6 +346,8 @@ routineCommand
   .description('Delete a thought routine')
   .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
   .option('-i, --id <routineId>', 'ID of the routine to delete (if not specified, select from list)')
+  .option('-y, --yes', 'Skip confirmation prompts (non-interactive mode)')
+  .option('-f, --force', 'Force deletion without detailed confirmation (alias for --yes)')
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
@@ -338,7 +359,8 @@ routineCommand
 
     displayCompactLogo();
     const routineCreator = new RoutineCreator(options.apiUrl, authManager);
-    await routineCreator.deleteRoutine(options.id);
+    const skipConfirmation = options.yes || options.force;
+    await routineCreator.deleteRoutine(options.id, skipConfirmation);
   });
 
 // Priority management command
