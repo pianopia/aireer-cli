@@ -68,7 +68,7 @@ export class RoutineManager {
         return JSON.parse(data);
       }
     } catch (error) {
-      console.log(chalk.yellow('⚠️  設定ファイルの読み込みに失敗しました。デフォルト設定を使用します。'));
+      console.log(chalk.yellow('⚠️  Failed to load configuration file. Using default settings.'));
     }
 
     // デフォルト設定
@@ -86,7 +86,7 @@ export class RoutineManager {
     try {
       fs.writeFileSync(this.configFile, JSON.stringify(this.config, null, 2));
     } catch (error) {
-      console.error(chalk.red('❌ 設定ファイルの保存に失敗しました:'), error);
+      console.error(chalk.red('❌ Failed to save configuration file:'), error);
     }
   }
 
@@ -96,19 +96,19 @@ export class RoutineManager {
       if (response.success && response.data) {
         return response.data;
       }
-      // API レスポンスが正常でも data が空の場合
-      console.log(chalk.gray('📝 アクティブなルーチンがありません'));
+      // Case when API response is successful but data is empty
+      console.log(chalk.gray('📝 No active routines available'));
       return [];
     } catch (error) {
-      // HTTP 500 エラーでも、認証関連エラーかルーチンなしかを判断
+      // Determine whether HTTP 500 error is due to authentication or no routines
       if (error instanceof Error) {
         if (error.message.includes('401') || error.message.includes('403')) {
-          console.error(chalk.red('❌ 認証エラー: ログインが必要です'));
+          console.error(chalk.red('❌ Authentication error: Login required'));
         } else if (error.message.includes('500')) {
-          // HTTP 500の場合、ルーチンがないことが原因の可能性が高い
-          console.log(chalk.gray('📝 アクティブなルーチンがありません (サーバーにルーチンが存在しません)'));
+          // HTTP 500 may be caused by no routines existing
+          console.log(chalk.gray('📝 No active routines available (no routines exist on server)'));
         } else {
-          console.log(chalk.yellow('⚠️  ルーチン取得で軽微なエラーが発生しましたが、処理を続行します'));
+          console.log(chalk.yellow('⚠️  Minor error occurred during routine retrieval, continuing with execution'));
         }
       }
       return [];
@@ -116,32 +116,32 @@ export class RoutineManager {
   }
 
   updateRoutinePriorities(routines: Routine[]): void {
-    console.log(chalk.blue('🔄 ルーチン優先度を更新中...'));
+    console.log(chalk.blue('🔄 Updating routine priorities...'));
     
-    // 新しいルーチンがあれば追加
+    // Add new routines if any
     for (const routine of routines) {
       const existing = this.config.priorities.find(p => p.routineId === routine.id);
       if (!existing) {
         const newPriority: RoutinePriority = {
           routineId: routine.id,
-          priority: 5, // デフォルト中間優先度
+          priority: 5, // Default medium priority
           weight: 1.0,
           executionCount: 0,
           successRate: 1.0
         };
         this.config.priorities.push(newPriority);
-        console.log(chalk.green(`➕ 新しいルーチンを追加: ${routine.name} (優先度: ${newPriority.priority})`));
+        console.log(chalk.green(`➕ Added new routine: ${routine.name} (priority: ${newPriority.priority})`));
       }
     }
 
-    // 存在しないルーチンを削除
+    // Remove non-existent routines
     const activeRoutineIds = routines.map(r => r.id);
     this.config.priorities = this.config.priorities.filter(p => {
       if (activeRoutineIds.includes(p.routineId)) {
         return true;
       } else {
         const routine = routines.find(r => r.id === p.routineId);
-        console.log(chalk.gray(`🗑️  非アクティブなルーチンを削除: ${routine?.name || p.routineId}`));
+        console.log(chalk.gray(`🗑️  Removed inactive routine: ${routine?.name || p.routineId}`));
         return false;
       }
     });
@@ -170,26 +170,26 @@ export class RoutineManager {
     });
 
     if (availableRoutines.length === 0) {
-      console.log(chalk.yellow('⏸️  すべてのルーチンがクールダウン中です'));
+      console.log(chalk.yellow('⏸️  All routines are in cooldown'));
       return null;
     }
 
-    // 重み付き確率選択
+    // Weighted probability selection
     const weights = availableRoutines.map(routine => {
       const priority = this.config.priorities.find(p => p.routineId === routine.id);
       if (!priority) return 1;
 
-      // 優先度、成功率、前回実行からの時間を考慮した重み計算
+      // Weight calculation considering priority, success rate, and time since last execution
       let weight = priority.priority * priority.weight * priority.successRate;
       
-      // 前回実行からの時間が長いほど重みを増加
+      // Increase weight as time since last execution grows
       if (priority.lastExecuted) {
         const timeSinceLastExecution = currentTime - new Date(priority.lastExecuted).getTime();
         const hoursSince = timeSinceLastExecution / (1000 * 60 * 60);
-        weight *= Math.min(1 + hoursSince * 0.1, 3); // 最大3倍まで
+        weight *= Math.min(1 + hoursSince * 0.1, 3); // Maximum 3x
       }
 
-      return Math.max(weight, 0.1); // 最低重み
+      return Math.max(weight, 0.1); // Minimum weight
     });
 
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -200,12 +200,12 @@ export class RoutineManager {
       currentWeight += weights[i];
       if (random <= currentWeight) {
         const selectedRoutine = availableRoutines[i];
-        console.log(chalk.green(`🎯 ルーチンを選択: ${selectedRoutine.name} (重み: ${weights[i].toFixed(2)})`));
+        console.log(chalk.green(`🎯 Selected routine: ${selectedRoutine.name} (weight: ${weights[i].toFixed(2)})`));
         return selectedRoutine;
       }
     }
 
-    // フォールバック（最後のルーチン）
+    // Fallback (last routine)
     return availableRoutines[availableRoutines.length - 1];
   }
 
@@ -215,8 +215,8 @@ export class RoutineManager {
       priority.lastExecuted = new Date().toISOString();
       priority.executionCount++;
       
-      // 成功率を更新（指数移動平均）
-      const alpha = 0.2; // 学習率
+      // Update success rate (exponential moving average)
+      const alpha = 0.2; // Learning rate
       priority.successRate = alpha * (success ? 1 : 0) + (1 - alpha) * priority.successRate;
       
       this.saveConfig();
@@ -224,41 +224,41 @@ export class RoutineManager {
   }
 
   async getRoutinePriorityInfo(): Promise<void> {
-    console.log(chalk.blue('\n📊 現在のルーチン優先度設定:'));
+    console.log(chalk.blue('\n📊 Current routine priority settings:'));
 
-    // 最新のルーチン情報を取得
+    // Get latest routine information
     const routines = await this.fetchActiveRoutines();
     const routineMap = new Map(routines.map(r => [r.id, r]));
 
     for (const priority of this.config.priorities) {
       const routine = routineMap.get(priority.routineId);
       const lastExecuted = priority.lastExecuted ? 
-        new Date(priority.lastExecuted).toLocaleString('ja-JP') : 
-        '未実行';
+        new Date(priority.lastExecuted).toLocaleString() : 
+        'Never executed';
       
-      // ルーチンの基本情報
-      const routineName = routine?.name || '不明';
-      const description = routine?.description || '説明なし';
+      // Basic routine information
+      const routineName = routine?.name || 'Unknown';
+      const description = routine?.description || 'No description';
       
-      // 最初のステップの内容をプロンプトとして取得
-      let firstStepContent = 'ステップなし';
+      // Get first step content as prompt
+      let firstStepContent = 'No steps';
       if (routine?.steps && routine.steps.length > 0) {
         const firstStep = routine.steps.sort((a, b) => a.order - b.order)[0];
-        firstStepContent = firstStep.content || 'ステップ内容なし';
+        firstStepContent = firstStep.content || 'No step content';
       }
 
-      // 各ルーチンを見やすく表示
+      // Display each routine in a readable format
       console.log(chalk.cyan(`\n📋 ${routineName} (ID: ${priority.routineId.substring(0, 10)})`));
-      console.log(chalk.gray(`   優先度: ${priority.priority}/10  |  重み: ${priority.weight.toFixed(2)}  |  実行: ${priority.executionCount}回  |  成功率: ${(priority.successRate * 100).toFixed(1)}%`));
-      console.log(chalk.gray(`   最終実行: ${lastExecuted}`));
-      console.log(chalk.yellow(`   📝 説明: ${description}`));
-      console.log(chalk.green(`   🔧 プロンプト: ${firstStepContent.length > 80 ? firstStepContent.substring(0, 80) + '...' : firstStepContent}`));
+      console.log(chalk.gray(`   Priority: ${priority.priority}/10  |  Weight: ${priority.weight.toFixed(2)}  |  Executions: ${priority.executionCount}  |  Success rate: ${(priority.successRate * 100).toFixed(1)}%`));
+      console.log(chalk.gray(`   Last executed: ${lastExecuted}`));
+      console.log(chalk.yellow(`   📝 Description: ${description}`));
+      console.log(chalk.green(`   🔧 Prompt: ${firstStepContent.length > 80 ? firstStepContent.substring(0, 80) + '...' : firstStepContent}`));
     }
 
-    console.log(chalk.blue('\n⚙️  グローバル設定:'));
-    console.log(chalk.gray(`最大実行数/サイクル: ${this.config.globalSettings.maxExecutionsPerCycle}`));
-    console.log(chalk.gray(`クールダウン期間: ${this.config.globalSettings.cooldownPeriod}秒`));
-    console.log(chalk.gray(`最小実行間隔: ${this.config.globalSettings.minimumInterval}秒`));
+    console.log(chalk.blue('\n⚙️  Global settings:'));
+    console.log(chalk.gray(`Max executions/cycle: ${this.config.globalSettings.maxExecutionsPerCycle}`));
+    console.log(chalk.gray(`Cooldown period: ${this.config.globalSettings.cooldownPeriod} seconds`));
+    console.log(chalk.gray(`Minimum interval: ${this.config.globalSettings.minimumInterval} seconds`));
   }
 
   adjustPriority(routineId: string, newPriority: number): boolean {
@@ -266,10 +266,10 @@ export class RoutineManager {
     if (priority) {
       priority.priority = Math.max(1, Math.min(10, newPriority));
       this.saveConfig();
-      console.log(chalk.green(`✅ ルーチン ${routineId} の優先度を ${priority.priority} に設定しました`));
+      console.log(chalk.green(`✅ Set priority of routine ${routineId} to ${priority.priority}`));
       return true;
     }
-    console.log(chalk.red(`❌ ルーチン ${routineId} が見つかりません`));
+    console.log(chalk.red(`❌ Routine ${routineId} not found`));
     return false;
   }
 
@@ -278,10 +278,10 @@ export class RoutineManager {
     if (priority) {
       priority.weight = Math.max(0.1, Math.min(5.0, newWeight));
       this.saveConfig();
-      console.log(chalk.green(`✅ ルーチン ${routineId} の重みを ${priority.weight} に設定しました`));
+      console.log(chalk.green(`✅ Set weight of routine ${routineId} to ${priority.weight}`));
       return true;
     }
-    console.log(chalk.red(`❌ ルーチン ${routineId} が見つかりません`));
+    console.log(chalk.red(`❌ Routine ${routineId} not found`));
     return false;
   }
 } 

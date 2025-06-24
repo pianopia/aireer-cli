@@ -15,8 +15,8 @@ interface InteractiveConfig {
 }
 
 export async function setupInteractiveMode(): Promise<void> {
-  console.log(chalk.blue('🎯 インタラクティブ設定モード'));
-  console.log(chalk.gray('設定項目を順番に入力してください\n'));
+  console.log(chalk.blue('🎯 Interactive configuration mode'));
+  console.log(chalk.gray('Please enter configuration items in order\n'));
 
   try {
     // AuthManagerインスタンスを作成
@@ -110,17 +110,17 @@ export async function setupInteractiveMode(): Promise<void> {
       config.count = parseInt(answers.count);
     }
 
-    // 設定確認
-    console.log(chalk.cyan('\n📋 設定確認:'));
-    console.log(chalk.gray(`モード: ${config.mode === 'schedule' ? '定期実行' : '並列実行'}`));
-    console.log(chalk.gray(`ベースURL: ${config.baseUrl}`));
-    console.log(chalk.gray(`エンドポイント: ${config.endpoints.join(', ')}`));
+    // Configuration confirmation
+    console.log(chalk.cyan('\n📋 Configuration confirmation:'));
+    console.log(chalk.gray(`Mode: ${config.mode === 'schedule' ? 'Scheduled execution' : 'Parallel execution'}`));
+    console.log(chalk.gray(`Base URL: ${config.baseUrl}`));
+    console.log(chalk.gray(`Endpoints: ${config.endpoints.join(', ')}`));
     if (config.mode === 'schedule') {
-      console.log(chalk.gray(`実行間隔: ${config.interval}秒`));
+      console.log(chalk.gray(`Execution interval: ${config.interval} seconds`));
     } else {
-      console.log(chalk.gray(`実行回数: ${config.count}回`));
+      console.log(chalk.gray(`Execution count: ${config.count} times`));
     }
-    console.log(chalk.gray(`並列実行数: ${config.concurrent}`));
+    console.log(chalk.gray(`Parallel executions: ${config.concurrent}`));
 
     const { confirmed } = await inquirer.prompt([
       {
@@ -132,7 +132,7 @@ export async function setupInteractiveMode(): Promise<void> {
     ]);
 
     if (!confirmed) {
-      console.log(chalk.yellow('実行をキャンセルしました'));
+      console.log(chalk.yellow('Execution cancelled'));
       return;
     }
 
@@ -157,7 +157,7 @@ export async function setupInteractiveMode(): Promise<void> {
 
   } catch (error) {
     if (error instanceof Error && error.name === 'ExitPromptError') {
-      console.log(chalk.yellow('\n操作がキャンセルされました'));
+      console.log(chalk.yellow('\nOperation cancelled'));
     } else {
       console.error(chalk.red('インタラクティブモードでエラーが発生しました:'), error);
     }

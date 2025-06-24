@@ -11,15 +11,12 @@ import { RoutineCreator } from './routine-creator.js';
 import { displayLogo, displayCompactLogo } from './logo.js';
 import { AuthManager } from './auth-manager.js';
 import { ConfigManager } from './config-manager.js';
-
-const packageJson = {
-  version: '1.0.0'
-};
+import packageJson from '../../package.json' with { type: 'json' };
 
 program
   .name('aireer')
   .description('CLI tool for the fully autonomous AI service "aireer"')
-  .version(packageJson.version);
+  .version(packageJson.version, '-v, --version', 'Display version number');
 
 // Login
 program
@@ -289,9 +286,9 @@ routineCommand
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -318,9 +315,9 @@ routineCommand
   .action(async (options: any) => {
     const authManager = new AuthManager(options.apiUrl);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 
@@ -461,9 +458,9 @@ program
   .action(async (options: any) => {
     const authManager = new AuthManager(options.url);
     
-    // 認証チェック
+    // Authentication check
     if (!(await authManager.ensureAuthenticated())) {
-      console.log(chalk.red('❌ 認証が必要です。"aireer login"でログインしてください。'));
+      console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
       process.exit(1);
     }
 

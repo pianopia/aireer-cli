@@ -1,6 +1,6 @@
 {
   "name": "@pianopia/aireer-cli",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "CLI tool that continuously hits APIs with parallel and scheduled execution",
   "type": "module",
   "main": "dist/index.js",

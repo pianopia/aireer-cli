@@ -86,10 +86,10 @@ export class LogManager {
 
     this.errors.push(errorEntry);
 
-    // 詳細なエラーログをファイルに出力
+    // Write detailed error log to file
     this.writeDetailedErrorToFile(errorId, errorEntry, error, apiResponse);
 
-    // CLIには簡潔なメッセージのみ表示
+    // Display only brief message in CLI
     const simpleMessage = this.getSimpleErrorMessage(errorType, errorId);
     console.error(chalk.red(simpleMessage));
 
@@ -106,12 +106,12 @@ export class LogManager {
 
     this.logs.push(entry);
 
-    // APIレスポンスがある場合は詳細ログファイルに保存
+    // Save to detailed log file if API response exists
     if (apiResponse) {
       this.writeSuccessLogToFile(taskId, data, apiResponse);
     }
 
-    // 通常ログファイルにも出力
+    // Also output to regular log file
     this.writeToFile(entry);
   }
 
@@ -120,7 +120,7 @@ export class LogManager {
       const logLine = `[${entry.timestamp}] ${entry.type.toUpperCase()} ${entry.taskId}: ${JSON.stringify(entry.data)}\n`;
       fs.appendFileSync(this.currentLogFile, logLine);
     } catch (error) {
-      // ログファイル書き込みエラーは無視（コンソールに出力のみ）
+      // Ignore log file write errors (console output only)
     }
   }
 
@@ -159,24 +159,24 @@ export class LogManager {
 
       fs.writeFileSync(errorLogFile, JSON.stringify(detailedError, null, 2));
       
-      console.log(chalk.gray(`📝 詳細エラーログ: ${errorLogFile}`));
+      console.log(chalk.gray(`📝 Detailed error log: ${errorLogFile}`));
     } catch (writeError) {
-      console.log(chalk.yellow('⚠️  エラーログファイルの書き込みに失敗しました'));
+      console.log(chalk.yellow('⚠️  Failed to write error log file'));
     }
   }
 
   private getSimpleErrorMessage(errorType: ErrorType, errorId: string): string {
     const messages = {
-      RATE_LIMIT_ERROR: `❌ レート制限エラー (${errorId})`,
-      LLM_API_ERROR: `❌ LLM API エラー (${errorId})`,
-      NETWORK_ERROR: `❌ ネットワークエラー (${errorId})`,
-      VALIDATION_ERROR: `❌ 入力検証エラー (${errorId})`,
-      FILE_OPERATION_ERROR: `❌ ファイル操作エラー (${errorId})`,
-      ROUTINE_EXECUTION_ERROR: `❌ ルーチン実行エラー (${errorId})`,
-      UNKNOWN_ERROR: `❌ 不明なエラー (${errorId})`,
+      RATE_LIMIT_ERROR: `❌ Rate limit error (${errorId})`,
+      LLM_API_ERROR: `❌ LLM API error (${errorId})`,
+      NETWORK_ERROR: `❌ Network error (${errorId})`,
+      VALIDATION_ERROR: `❌ Input validation error (${errorId})`,
+      FILE_OPERATION_ERROR: `❌ File operation error (${errorId})`,
+      ROUTINE_EXECUTION_ERROR: `❌ Routine execution error (${errorId})`,
+      UNKNOWN_ERROR: `❌ Unknown error (${errorId})`,
     };
 
-    return messages[errorType] || `❌ エラー (${errorId})`;
+    return messages[errorType] || `❌ Error (${errorId})`;
   }
 
   private writeSuccessLogToFile(taskId: string, data: any, apiResponse: any): void {
@@ -199,15 +199,15 @@ export class LogManager {
       };
 
       fs.writeFileSync(successLogFile, JSON.stringify(detailedSuccess, null, 2));
-      console.log(chalk.gray(`📝 詳細成功ログ: ${successLogFile}`));
+      console.log(chalk.gray(`📝 Detailed success log: ${successLogFile}`));
     } catch (writeError) {
-      console.log(chalk.yellow('⚠️  成功ログファイルの書き込みに失敗しました'));
+      console.log(chalk.yellow('⚠️  Failed to write success log file'));
     }
   }
 
   private sanitizeApiResponse(response: any): any {
     try {
-      // APIレスポンスを安全に記録用にサニタイズ
+      // Safely sanitize API response for logging
       if (typeof response === 'string') {
         try {
           return JSON.parse(response);
@@ -217,14 +217,14 @@ export class LogManager {
       }
       
       if (response && typeof response === 'object') {
-        // 大きすぎるレスポンスは切り詰める
+        // Truncate responses that are too large
         const responseString = JSON.stringify(response);
         if (responseString.length > 50000) {
           return {
             ...response,
             _truncated: true,
             _originalSize: responseString.length,
-            _message: 'レスポンスが大きすぎるため切り詰められました'
+            _message: 'Response was truncated due to large size'
           };
         }
         return response;
@@ -233,7 +233,7 @@ export class LogManager {
       return response;
     } catch (error) {
       return {
-        _error: 'レスポンスのサニタイズに失敗',
+        _error: 'Failed to sanitize response',
         _original: String(response)
       };
     }

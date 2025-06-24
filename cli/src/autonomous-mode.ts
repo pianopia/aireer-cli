@@ -31,12 +31,12 @@ interface LLMResponse {
 }
 
 export async function startAutonomousMode(options: AutonomousOptions): Promise<void> {
-  console.log(chalk.blue('🤖 完全自律モードを開始します...'));
+  console.log(chalk.blue('🤖 Starting fully autonomous mode...'));
   console.log(chalk.gray(`API URL: ${options.apiUrl}`));
-  console.log(chalk.gray(`作業ディレクトリ: ${options.directory}`));
-  console.log(chalk.gray(`実行間隔: ${options.interval}秒`));
-  console.log(chalk.gray(`最大実行数/サイクル: ${options.maxExecutionsPerCycle}`));
-  console.log(chalk.gray(`LLMモード: ${options.useGeminiDirect ? 'Gemini Direct' : 'API経由'}\n`));
+  console.log(chalk.gray(`Working directory: ${options.directory}`));
+  console.log(chalk.gray(`Execution interval: ${options.interval} seconds`));
+  console.log(chalk.gray(`Max executions/cycle: ${options.maxExecutionsPerCycle}`));
+  console.log(chalk.gray(`LLM mode: ${options.useGeminiDirect ? 'Gemini Direct' : 'Via API'}\n`));
 
   const routineManager = new RoutineManager(options.apiUrl, options.directory, options.authManager);
   const apiClient = new ApiClient(options.apiUrl);
@@ -56,61 +56,61 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
   let rateLimitErrorCount = 0;
   let adaptiveInterval = options.interval;
 
-  // Ctrl+Cで停止するためのハンドラー
+  // Handler to stop with Ctrl+C
   process.on('SIGINT', () => {
-    console.log(chalk.yellow('\n⏹️  自律モードを停止しています...'));
+    console.log(chalk.yellow('\n⏹️  Stopping autonomous mode...'));
     isRunning = false;
     process.exit(0);
   });
 
-  // 初期の優先度設定を表示
-  console.log(chalk.blue('📋 初期設定を確認中...'));
+  // Display initial priority settings
+  console.log(chalk.blue('📋 Checking initial settings...'));
   await updateRoutinePriorities(routineManager);
 
   while (isRunning) {
     cycleCount++;
-    console.log(chalk.cyan(`\n🔄 サイクル ${cycleCount} を開始...`));
+    console.log(chalk.cyan(`\n🔄 Starting cycle ${cycleCount}...`));
 
     try {
-      // アクティブなルーチンを取得
+      // Fetch active routines
       const activeRoutines = await routineManager.fetchActiveRoutines();
       
       if (activeRoutines.length === 0) {
         if (cycleCount === 1) {
-          console.log(chalk.blue('📝 現在、アクティブなルーチンが設定されていません'));
-          console.log(chalk.gray('   ルーチンを作成してアクティブ化すると、自動実行が開始されます'));
+          console.log(chalk.blue('📝 No active routines are currently configured'));
+          console.log(chalk.gray('   Create and activate routines to start automatic execution'));
         } else {
-          console.log(chalk.gray('📝 アクティブなルーチンがありません'));
+          console.log(chalk.gray('📝 No active routines available'));
         }
         await sleep(options.interval * 1000);
         continue;
       }
 
-      console.log(chalk.blue(`📥 ${activeRoutines.length}個のアクティブなルーチンを取得`));
+      console.log(chalk.blue(`📥 Retrieved ${activeRoutines.length} active routines`));
 
-      // 優先度設定を更新
+      // Update priority settings
       routineManager.updateRoutinePriorities(activeRoutines);
 
-      // 今回のサイクルで実行するルーチンを選択
+      // Select routines to execute in this cycle
       const executionsThisCycle = [];
       
       for (let i = 0; i < options.maxExecutionsPerCycle; i++) {
         const selectedRoutine = routineManager.selectRoutineToExecute(activeRoutines);
         
         if (!selectedRoutine) {
-          console.log(chalk.yellow(`⏸️  実行可能なルーチンがありません (${i + 1}/${options.maxExecutionsPerCycle})`));
+          console.log(chalk.yellow(`⏸️  No executable routines available (${i + 1}/${options.maxExecutionsPerCycle})`));
           break;
         }
 
         executionsThisCycle.push(selectedRoutine);
         
-        // 一時的に実行済みとマークして、同じサイクル内での重複実行を防ぐ
+        // Temporarily mark as executed to prevent duplicate execution in the same cycle
         routineManager.recordExecution(selectedRoutine.id, true);
       }
 
-      // 選択されたルーチンを並列実行
+      // Execute selected routines in parallel
       if (executionsThisCycle.length > 0) {
-        console.log(chalk.green(`🚀 ${executionsThisCycle.length}個のルーチンを実行中...`));
+        console.log(chalk.green(`🚀 Executing ${executionsThisCycle.length} routines...`));
         
         const executionPromises = executionsThisCycle.map(routine => 
           executeRoutine(routine, apiClient, fileManager, options, routineManager, logManager, executionHistory, cycleCount)
@@ -118,26 +118,26 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
 
         await Promise.allSettled(executionPromises);
       } else {
-        console.log(chalk.yellow('😴 このサイクルでは実行するルーチンがありません'));
+        console.log(chalk.yellow('😴 No routines to execute in this cycle'));
       }
 
-      // 統計表示
+      // Display statistics
       if (cycleCount % 5 === 0) {
         await routineManager.getRoutinePriorityInfo();
       }
 
-      // レート制限エラーカウントをリセット（成功したサイクル）
+      // Reset rate limit error count (successful cycle)
       rateLimitErrorCount = 0;
       adaptiveInterval = options.interval;
 
-      // 次のサイクルまで待機
+      // Wait until next cycle
       if (isRunning) {
-        console.log(chalk.gray(`⏳ ${adaptiveInterval}秒待機中...`));
+        console.log(chalk.gray(`⏳ Waiting ${adaptiveInterval} seconds...`));
         await sleep(adaptiveInterval * 1000);
       }
 
     } catch (error: any) {
-      // レート制限エラーの場合は特別な処理
+      // Special handling for rate limit errors
       const isRateLimit = error.response?.data?.error === 'RATE_LIMIT_EXCEEDED' || 
                          error.status === 429 || 
                          error.message?.includes('rate limit');
@@ -154,7 +154,7 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
         errorType = 'LLM_API_ERROR';
       }
 
-             // LogManagerでエラーを記録
+             // Record error with LogManager
        logManager.logError(
          `cycle-${cycleCount}`,
          error,
@@ -166,11 +166,11 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
            apiUrl: options.apiUrl,
            maxExecutions: options.maxExecutionsPerCycle
          },
-         error.response?.data // APIエラーレスポンスがあれば記録
+         error.response?.data // Record API error response if available
        );
       
       if (isRunning) {
-        console.log(chalk.gray(`⏳ ${adaptiveInterval}秒待機してリトライします...`));
+        console.log(chalk.gray(`⏳ Waiting ${adaptiveInterval} seconds before retry...`));
         await sleep(adaptiveInterval * 1000);
       }
     }
@@ -178,21 +178,21 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
 }
 
 async function updateRoutinePriorities(routineManager: RoutineManager): Promise<void> {
-  const spinner = ora('ルーチン優先度を更新中...').start();
+  const spinner = ora('Updating routine priorities...').start();
   
   try {
     const routines = await routineManager.fetchActiveRoutines();
     if (routines.length === 0) {
-      spinner.info('アクティブなルーチンがありません - 優先度設定をスキップ');
+      spinner.info('No active routines found - skipping priority settings');
       return;
     }
     
     routineManager.updateRoutinePriorities(routines);
     await routineManager.getRoutinePriorityInfo();
-    spinner.succeed('ルーチン優先度の更新完了');
+    spinner.succeed('Routine priority update complete');
   } catch (error) {
-    spinner.fail('ルーチン優先度の更新に失敗');
-    console.log(chalk.gray('   処理を続行します...'));
+    spinner.fail('Failed to update routine priorities');
+    console.log(chalk.gray('   Continuing with execution...'));
   }
 }
 
@@ -214,24 +214,24 @@ async function executeRoutine(
   let errorMessage = '';
 
   try {
-    console.log(chalk.blue(`\n🔧 ルーチン実行開始: ${routine.name}`));
-    console.log(chalk.gray(`説明: ${routine.description}`));
+    console.log(chalk.blue(`\n🔧 Starting routine execution: ${routine.name}`));
+    console.log(chalk.gray(`Description: ${routine.description}`));
 
-    // ルーチンの内容をプロンプトとして構築
+    // Build routine content as prompt
     const prompt = await buildRoutinePrompt(routine, executionHistory);
     
-    // 現在のディレクトリ状態を取得
+    // Get current directory state
     const currentState = await getDirectoryState(options.directory);
-    const fullPrompt = `${prompt}\n\n現在のディレクトリの状態:\n${currentState}`;
+    const fullPrompt = `${prompt}\n\nCurrent directory state:\n${currentState}`;
     executedPrompt = fullPrompt;
 
-    console.log(chalk.cyan('📤 LLM APIにリクエスト中...'));
+    console.log(chalk.cyan('📤 Sending request to LLM API...'));
 
-    // LLM APIを叩く（Gemini直接 or API経由）
+    // Call LLM API (Gemini direct or via API)
     let llmResult: { content: string | null; rawResponse: any };
     
     if (options.useGeminiDirect && options.geminiClient) {
-      // Gemini APIに直接リクエスト
+      // Direct request to Gemini API
       const geminiResult = await RateLimitHandler.executeWithRetry(
         () => options.geminiClient!.generateContent({ prompt: fullPrompt }),
         { maxRetries: 2, baseDelay: 2000 }
@@ -241,7 +241,7 @@ async function executeRoutine(
         rawResponse: geminiResult.rawResponse
       };
     } else {
-      // API経由でリクエスト
+      // Request via API
       llmResult = await RateLimitHandler.executeWithRetry(
         () => getLLMResponseFromAPI(apiClient, fullPrompt, options.llmEndpoint),
         { maxRetries: 2, baseDelay: 2000 }
@@ -249,16 +249,16 @@ async function executeRoutine(
     }
     
     if (!llmResult?.content) {
-      throw new Error('LLM APIからレスポンスが得られませんでした');
+      throw new Error('No response received from LLM API');
     }
 
-    // JSONレスポンスを解析して実行
+    // Parse and execute JSON response
     const responseJson = parseJSONResponse(llmResult.content);
     llmResponseData = responseJson;
     
     if (responseJson) {
               await executeFileOperation(responseJson, fileManager, options.directory);
-        // ファイル操作の記録
+        // Record file operations
         fileOperations.push({
           type: responseJson.type,
           filepath: responseJson.filepath,
@@ -266,9 +266,9 @@ async function executeRoutine(
           success: true
         });
       success = true;
-      console.log(chalk.green(`✅ ルーチン「${routine.name}」の実行完了`));
+      console.log(chalk.green(`✅ Routine "${routine.name}" execution completed`));
       
-      // 成功ログを記録（APIレスポンスも含む）
+      // Record success log (including API response)
       logManager.logSuccess(`routine-${routine.id}`, {
         routineName: routine.name,
         responseType: responseJson.type,
@@ -276,11 +276,11 @@ async function executeRoutine(
         llmResponse: responseJson
       }, llmResult.rawResponse);
     } else {
-      throw new Error('有効なJSONレスポンスが得られませんでした');
+      throw new Error('No valid JSON response received');
     }
 
   } catch (error: any) {
-    // エラータイプを判定
+    // Determine error type
     let errorType: any = 'ROUTINE_EXECUTION_ERROR';
     
     if (error.response?.data?.error === 'RATE_LIMIT_EXCEEDED' || error.status === 429) {
@@ -295,7 +295,7 @@ async function executeRoutine(
 
     errorMessage = error.message || 'Unknown error';
 
-    // LogManagerでエラーを記録（詳細はファイルに、CLIには簡潔に）
+    // Record error with LogManager (details in file, concise in CLI)
     const errorId = logManager.logError(
       `routine-${routine.id}`,
       error,
@@ -307,22 +307,22 @@ async function executeRoutine(
         apiUrl: options.apiUrl,
         directory: options.directory
       },
-      error.response?.data // APIエラーレスポンスがあれば記録
+      error.response?.data // Record API error response if available
     );
 
     success = false;
   } finally {
-    // 実行結果を記録
+    // Record execution result
     const duration = Date.now() - startTime;
     routineManager.recordExecution(routine.id, success);
 
-    // 詳細な実行履歴を記録
+    // Record detailed execution history
     const executionDetail: ExecutionDetail = {
       id: nanoid(),
       routineId: routine.id,
       routineName: routine.name,
       success,
-      message: success ? '正常に実行されました' : errorMessage || '実行中にエラーが発生しました',
+      message: success ? 'Executed successfully' : errorMessage || 'Error occurred during execution',
       error: success ? undefined : errorMessage,
       duration,
       executedAt: new Date().toISOString(),
@@ -336,60 +336,60 @@ async function executeRoutine(
       }
     };
 
-    // ExecutionHistoryクラスを使用して詳細な履歴を記録
+    // Record detailed history using ExecutionHistory class
     await executionHistory.recordExecution(executionDetail);
   }
 }
 
 async function buildRoutinePrompt(routine: any, executionHistory: ExecutionHistory): Promise<string> {
-  let prompt = `ルーチン: ${routine.name}\n説明: ${routine.description}\n\n`;
+  let prompt = `Routine: ${routine.name}\nDescription: ${routine.description}\n\n`;
   
   if (routine.steps && routine.steps.length > 0) {
-    prompt += 'ステップ:\n';
+    prompt += 'Steps:\n';
     routine.steps.forEach((step: any, index: number) => {
       prompt += `${index + 1}. ${step.content}`;
       if (step.parameters) {
         try {
           const params = typeof step.parameters === 'string' ? 
             JSON.parse(step.parameters) : step.parameters;
-          prompt += ` (パラメータ: ${JSON.stringify(params)})`;
+          prompt += ` (Parameters: ${JSON.stringify(params)})`;
         } catch (e) {
-          // パラメータの解析に失敗した場合は無視
+          // Ignore parameter parsing errors
         }
       }
       prompt += '\n';
     });
   }
 
-  // 前回の実行履歴を追加（重複回避のため）
+  // Add previous execution history (to avoid duplication)
   const previousExecutionsSummary = await executionHistory.getPreviousExecutionsSummary(routine.id, 3);
   prompt += `\n${previousExecutionsSummary}\n`;
 
-  // 最近のファイル操作リストを取得
+  // Get recent file operations list
   const recentOperations = await executionHistory.getRecentFileOperations(routine.id, 24);
   if (recentOperations.length > 0) {
-    prompt += `【24時間以内に実行済みの操作（重複回避）】\n`;
+    prompt += `【Operations executed within the last 24 hours (avoid duplication)】\n`;
     recentOperations.forEach(op => {
       prompt += `- ${op}\n`;
     });
-    prompt += `上記の操作と同じファイル・コマンドは避けて、新しいアプローチを取ってください。\n\n`;
+    prompt += `Please avoid the same files/commands as above operations and take a new approach.\n\n`;
   }
 
-  prompt += `以下のJSON形式で実行内容を返してください。メッセージは不要で、JSONのみを返してください：
-{"type": "create|change|delete|execute|done", "filepath": "<ファイルパス>", "file": "<ファイル内容>", "command": "<コマンド>"}
+  prompt += `Please return the execution content in the following JSON format. No messages needed, return only JSON:
+{"type": "create|change|delete|execute|done", "filepath": "<file path>", "file": "<file content>", "command": "<command>"}
 
-- ファイルを作成する場合: type="create"
-- ファイルを変更する場合: type="change"  
-- ファイルを削除する場合: type="delete"
-- コマンドを実行する場合: type="execute"
-- 何もしない場合: type="done"
+- To create a file: type="create"
+- To modify a file: type="change"  
+- To delete a file: type="delete"
+- To execute a command: type="execute"
+- To do nothing: type="done"
 
-【重要な指示】
-1. 前回の実行履歴と全く同じ操作は避けてください
-2. 既に作成済みのファイルを再作成しないでください  
-3. 同じコマンドを繰り返し実行しないでください
-4. 新しい観点や異なる手法でタスクを進めてください
-5. 既存のファイルがあるかチェックして、必要に応じて変更（change）を選択してください`;
+【Important Instructions】
+1. Avoid exactly the same operations as previous execution history
+2. Do not recreate files that have already been created  
+3. Do not repeatedly execute the same commands
+4. Proceed with tasks from new perspectives or different approaches
+5. Check if existing files exist and select change if necessary`;
 
   return prompt;
 }
@@ -409,7 +409,7 @@ async function getDirectoryState(directory: string): Promise<string> {
       });
       return result;
     } catch (error2) {
-      return 'ディレクトリ状態の取得に失敗しました';
+      return 'Failed to get directory state';
     }
   }
 }
@@ -439,7 +439,7 @@ async function getLLMResponseFromAPI(
       rawResponse: response
     };
   } catch (error) {
-    console.error(chalk.red('LLM API呼び出しエラー:'), error);
+    console.error(chalk.red('LLM API call error:'), error);
     return {
       content: null,
       rawResponse: null
@@ -463,7 +463,7 @@ function parseJSONResponse(response: string): LLMResponse | null {
     
     return null;
   } catch (error) {
-    console.error(chalk.yellow('⚠️  JSON解析エラー:'), error);
+    console.error(chalk.yellow('⚠️  JSON parsing error:'), error);
     return null;
   }
 }
@@ -473,16 +473,16 @@ async function executeFileOperation(
   fileManager: FileManager, 
   baseDirectory: string
 ): Promise<void> {
-  console.log(chalk.blue(`🔧 操作実行: ${responseJson.type}`));
+  console.log(chalk.blue(`🔧 Executing operation: ${responseJson.type}`));
 
   switch (responseJson.type) {
     case 'create':
       if (responseJson.filepath && responseJson.file) {
         try {
           await fileManager.createFile(responseJson.filepath, responseJson.file);
-          console.log(chalk.green(`📄 ファイル作成: ${responseJson.filepath}`));
+          console.log(chalk.green(`📄 File created: ${responseJson.filepath}`));
         } catch (error: any) {
-          console.log(chalk.red(`❌ ファイル作成失敗: ${error.message}`));
+          console.log(chalk.red(`❌ File creation failed: ${error.message}`));
         }
       }
       break;
@@ -491,9 +491,9 @@ async function executeFileOperation(
       if (responseJson.filepath && responseJson.file) {
         try {
           await fileManager.editFile(responseJson.filepath, responseJson.file);
-          console.log(chalk.green(`📝 ファイル更新: ${responseJson.filepath}`));
+          console.log(chalk.green(`📝 File updated: ${responseJson.filepath}`));
         } catch (error: any) {
-          console.log(chalk.red(`❌ ファイル更新失敗: ${error.message}`));
+          console.log(chalk.red(`❌ File update failed: ${error.message}`));
         }
       }
       break;
@@ -502,9 +502,9 @@ async function executeFileOperation(
       if (responseJson.filepath) {
         try {
           await fileManager.deleteFile(responseJson.filepath);
-          console.log(chalk.green(`🗑️  ファイル削除: ${responseJson.filepath}`));
+          console.log(chalk.green(`🗑️  File deleted: ${responseJson.filepath}`));
         } catch (error: any) {
-          console.log(chalk.red(`❌ ファイル削除失敗: ${error.message}`));
+          console.log(chalk.red(`❌ File deletion failed: ${error.message}`));
         }
       }
       break;
@@ -512,25 +512,25 @@ async function executeFileOperation(
     case 'execute':
       if (responseJson.command) {
         try {
-          console.log(chalk.cyan(`⚡ コマンド実行: ${responseJson.command}`));
+          console.log(chalk.cyan(`⚡ Executing command: ${responseJson.command}`));
           const result = execSync(responseJson.command, { 
             encoding: 'utf-8',
             cwd: responseJson.directory || baseDirectory,
-            timeout: 30000 // 30秒タイムアウト
+            timeout: 30000 // 30 second timeout
           });
-          console.log(chalk.gray(`結果: ${result.substring(0, 200)}...`));
+          console.log(chalk.gray(`Result: ${result.substring(0, 200)}...`));
         } catch (error: any) {
-          console.log(chalk.red(`❌ コマンド実行失敗: ${error.message}`));
+          console.log(chalk.red(`❌ Command execution failed: ${error.message}`));
         }
       }
       break;
 
     case 'done':
-      console.log(chalk.green('✅ 処理完了'));
+      console.log(chalk.green('✅ Processing completed'));
       break;
 
     default:
-      console.log(chalk.yellow(`⚠️  不明な操作タイプ: ${responseJson.type}`));
+      console.log(chalk.yellow(`⚠️  Unknown operation type: ${responseJson.type}`));
   }
 }
 

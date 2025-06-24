@@ -10,7 +10,7 @@ interface HealthCheckResult {
 }
 
 export async function checkApiHealth(baseUrl: string): Promise<void> {
-  console.log(chalk.blue('🔍 API健康状態をチェックしています...\n'));
+  console.log(chalk.blue('🔍 Checking API health status...\n'));
 
   const apiClient = new ApiClient(baseUrl);
   const endpoints = [
@@ -25,7 +25,7 @@ export async function checkApiHealth(baseUrl: string): Promise<void> {
   const results: HealthCheckResult[] = [];
 
   for (const endpoint of endpoints) {
-    const spinner = ora(`${endpoint} をチェック中...`).start();
+    const spinner = ora(`Checking ${endpoint}...`).start();
     const startTime = Date.now();
 
     try {
@@ -54,35 +54,35 @@ export async function checkApiHealth(baseUrl: string): Promise<void> {
     }
   }
 
-  // 結果サマリーを表示
-  console.log(chalk.blue('\n📊 健康状態チェック結果:'));
+  // Display result summary
+  console.log(chalk.blue('\n📊 Health check results:'));
   
   const successCount = results.filter(r => r.status === 'ok').length;
   const totalCount = results.length;
   const averageResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / totalCount;
 
-  console.log(chalk.green(`✓ 成功: ${successCount}/${totalCount}`));
-  console.log(chalk.red(`✗ 失敗: ${totalCount - successCount}/${totalCount}`));
-  console.log(chalk.gray(`⏱️  平均応答時間: ${averageResponseTime.toFixed(2)}ms`));
+  console.log(chalk.green(`✓ Success: ${successCount}/${totalCount}`));
+  console.log(chalk.red(`✗ Failed: ${totalCount - successCount}/${totalCount}`));
+  console.log(chalk.gray(`⏱️  Average response time: ${averageResponseTime.toFixed(2)}ms`));
 
-  // エラーの詳細を表示
+  // Display error details
   const errors = results.filter(r => r.status === 'error');
   if (errors.length > 0) {
-    console.log(chalk.yellow('\n⚠️  エラーの詳細:'));
+    console.log(chalk.yellow('\n⚠️  Error details:'));
     errors.forEach(error => {
       console.log(chalk.red(`  ${error.endpoint}: ${error.details}`));
     });
   }
 
-  // 全体的な健康状態
+  // Overall health status
   const healthPercentage = (successCount / totalCount) * 100;
   if (healthPercentage === 100) {
-    console.log(chalk.green('\n🎉 APIは完全に健康な状態です！'));
+    console.log(chalk.green('\n🎉 API is in perfect health!'));
   } else if (healthPercentage >= 80) {
-    console.log(chalk.yellow('\n⚠️  APIは概ね健康ですが、一部に問題があります'));
+    console.log(chalk.yellow('\n⚠️  API is generally healthy but has some issues'));
   } else if (healthPercentage >= 50) {
-    console.log(chalk.red('\n🚨 APIに重大な問題があります'));
+    console.log(chalk.red('\n🚨 API has serious problems'));
   } else {
-    console.log(chalk.red('\n💀 APIがほとんど機能していません'));
+    console.log(chalk.red('\n💀 API is barely functioning'));
   }
 } 

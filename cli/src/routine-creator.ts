@@ -357,7 +357,7 @@ export class RoutineCreator {
     let addMore = true;
     let order = 0;
 
-    console.log(chalk.yellow('カスタム思考ステップを定義します'));
+    console.log(chalk.yellow('Define custom thought steps'));
     
     while (addMore) {
       const stepInfo = await inquirer.prompt([
@@ -420,7 +420,7 @@ export class RoutineCreator {
   }
 
   private async customizeSteps(steps: RoutineStep[]): Promise<RoutineStep[]> {
-    console.log(chalk.cyan('\n現在のステップ:'));
+    console.log(chalk.cyan('\nCurrent steps:'));
     steps.forEach((step, index) => {
       console.log(chalk.gray(`${index + 1}. [${step.type}] ${step.content}`));
     });
@@ -445,13 +445,13 @@ export class RoutineCreator {
   }
 
   private async confirmRoutine(routineData: CreateRoutineData): Promise<void> {
-    console.log(chalk.cyan('\n📋 ルーチン確認'));
-    console.log(chalk.white(`名前: ${routineData.name}`));
-    console.log(chalk.white(`説明: ${routineData.description}`));
-    console.log(chalk.white(`アクティブ: ${routineData.isActive ? 'はい' : 'いいえ'}`));
-    console.log(chalk.white(`ステップ数: ${routineData.steps.length}`));
+    console.log(chalk.cyan('\n📋 Routine confirmation'));
+    console.log(chalk.white(`Name: ${routineData.name}`));
+    console.log(chalk.white(`Description: ${routineData.description}`));
+    console.log(chalk.white(`Active: ${routineData.isActive ? 'Yes' : 'No'}`));
+    console.log(chalk.white(`Number of steps: ${routineData.steps.length}`));
 
-    console.log(chalk.cyan('\nステップ詳細:'));
+    console.log(chalk.cyan('\nStep details:'));
     routineData.steps.forEach((step, index) => {
       console.log(chalk.gray(`  ${index + 1}. [${step.type}] ${step.content}`));
     });
@@ -472,19 +472,19 @@ export class RoutineCreator {
 
   private async submitRoutine(routineData: CreateRoutineData): Promise<void> {
     try {
-      console.log(chalk.blue('🚀 ルーチンを作成中...'));
+      console.log(chalk.blue('🚀 Creating routine...'));
       
       const response = await this.apiClient.post('/api/routines', routineData);
       
       if (response.success) {
-        console.log(chalk.green('✅ 思考ルーチンが正常に作成されました！'));
-        console.log(chalk.white(`ルーチンID: ${response.data.id}`));
-        console.log(chalk.white(`名前: ${response.data.name}`));
-        console.log(chalk.white(`アクティブ: ${response.data.isActive ? 'はい' : 'いいえ'}`));
+        console.log(chalk.green('✅ Thought routine created successfully!'));
+        console.log(chalk.white(`Routine ID: ${response.data.id}`));
+        console.log(chalk.white(`Name: ${response.data.name}`));
+        console.log(chalk.white(`Active: ${response.data.isActive ? 'Yes' : 'No'}`));
         
         if (response.data.isActive) {
-          console.log(chalk.cyan('\n🤖 このルーチンは自律モードで自動実行されます'));
-          console.log(chalk.gray('  `aireer autonomous` コマンドで自律モードを開始できます'));
+          console.log(chalk.cyan('\n🤖 This routine will be automatically executed in autonomous mode'));
+          console.log(chalk.gray('  You can start autonomous mode with `aireer autonomous` command'));
         }
       } else {
         console.error(chalk.red('❌ ルーチン作成に失敗しました:'), response.message);
@@ -496,30 +496,30 @@ export class RoutineCreator {
 
   async listRoutines(): Promise<void> {
     try {
-      console.log(chalk.blue('📋 ルーチン一覧を取得中...'));
+      console.log(chalk.blue('📋 Fetching routine list...'));
       
       const response = await this.apiClient.get('/api/routines');
       
       if (response.success && response.data) {
         if (response.data.length === 0) {
-          console.log(chalk.yellow('📝 登録されているルーチンはありません'));
-          console.log(chalk.gray('  `aireer routine create` で新しいルーチンを作成できます'));
+          console.log(chalk.yellow('📝 No routines registered'));
+          console.log(chalk.gray('  You can create a new routine with `aireer routine create`'));
           return;
         }
 
-        console.log(chalk.green(`✅ ${response.data.length}個のルーチンが見つかりました\n`));
+        console.log(chalk.green(`✅ Found ${response.data.length} routines\n`));
         
         response.data.forEach((routine: any, index: number) => {
-          const status = routine.isActive ? chalk.green('🟢 アクティブ') : chalk.gray('⚫ 非アクティブ');
+          const status = routine.isActive ? chalk.green('🟢 Active') : chalk.gray('⚫ Inactive');
           console.log(chalk.white(`${index + 1}. ${routine.name} ${status}`));
           console.log(chalk.gray(`   ID: ${routine.id}`));
-          console.log(chalk.gray(`   説明: ${routine.description}`));
-          console.log(chalk.gray(`   ステップ数: ${routine.steps?.length || 0}`));
-          console.log(chalk.gray(`   作成日: ${new Date(routine.createdAt).toLocaleString()}`));
+          console.log(chalk.gray(`   Description: ${routine.description}`));
+          console.log(chalk.gray(`   Number of steps: ${routine.steps?.length || 0}`));
+          console.log(chalk.gray(`   Created: ${new Date(routine.createdAt).toLocaleString()}`));
           console.log('');
         });
       } else {
-        console.log(chalk.yellow('⚠️  ルーチンの取得に失敗しました'));
+        console.log(chalk.yellow('⚠️  Failed to retrieve routines'));
       }
     } catch (error) {
       console.error(chalk.red('❌ ルーチン一覧取得でエラーが発生しました:'), error);
