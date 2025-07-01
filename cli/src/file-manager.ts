@@ -22,13 +22,24 @@ export class FileManager {
   private baseDir: string;
 
   constructor(baseDir: string = process.cwd()) {
-    this.baseDir = baseDir;
+    this.baseDir = path.resolve(baseDir);
+  }
+
+  /**
+   * パスがベースディレクトリ内に制限されているかチェック
+   */
+  private validatePath(filepath: string): void {
+    const resolvedPath = path.resolve(this.baseDir, filepath);
+    if (!resolvedPath.startsWith(this.baseDir)) {
+      throw new Error(`セキュリティエラー: 指定されたパス '${filepath}' はワーキングディレクトリ外です`);
+    }
   }
 
   /**
    * ファイルを作成する
    */
   async createFile(filepath: string, content: string = '', encoding: BufferEncoding = 'utf-8'): Promise<void> {
+    this.validatePath(filepath);
     const spinner = ora(`ファイルを作成中: ${filepath}`).start();
     
     try {
@@ -52,6 +63,7 @@ export class FileManager {
    * ファイルを編集する
    */
   async editFile(filepath: string, content: string, encoding: BufferEncoding = 'utf-8'): Promise<void> {
+    this.validatePath(filepath);
     const spinner = ora(`ファイルを編集中: ${filepath}`).start();
     
     try {
@@ -73,6 +85,7 @@ export class FileManager {
    * ファイルを削除する
    */
   async deleteFile(filepath: string): Promise<void> {
+    this.validatePath(filepath);
     const spinner = ora(`ファイルを削除中: ${filepath}`).start();
     
     try {
@@ -102,6 +115,7 @@ export class FileManager {
    * ファイルを読み取る
    */
   async readFile(filepath: string, encoding: BufferEncoding = 'utf-8'): Promise<string> {
+    this.validatePath(filepath);
     try {
       const fullPath = this.getFullPath(filepath);
       

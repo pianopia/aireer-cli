@@ -468,12 +468,96 @@ function parseJSONResponse(response: string): LLMResponse | null {
   }
 }
 
+/**
+ * 危険なコマンドをチェックして実行をブロックする
+ */
+function isCommandSafe(command: string): { safe: boolean; reason?: string } {
+  const dangerousCommands = [
+    'rm -rf /',
+    'format',
+    'shutdown',
+    'reboot',
+    'halt',
+    'init 0',
+    'init 6',
+    'dd if=',
+    'mkfs',
+    'fdisk',
+    'parted',
+    'sudo rm',
+    'sudo shutdown',
+    'sudo reboot',
+    'sudo halt'
+  ];
+
+  const dangerousPaths = [
+    '/etc/',
+    '/usr/',
+    '/bin/',
+    '/sbin/',
+    '/boot/',
+    '/sys/',
+    '/proc/',
+    '/dev/'
+  ];
+
+  const lowerCommand = command.toLowerCase().trim();
+  
+  // 危険なコマンドのチェック
+  for (const dangerous of dangerousCommands) {
+    if (lowerCommand.includes(dangerous)) {
+      return { safe: false, reason: `危険なコマンドが検出されました: ${dangerous}` };
+    }
+  }
+
+  // 危険なパスへの操作チェック
+  for (const path of dangerousPaths) {
+    if (lowerCommand.includes(path)) {
+      return { safe: false, reason: `システム重要ディレクトリへの操作は禁止されています: ${path}` };
+    }
+  }
+
+  // sudo権限の使用チェック
+  if (lowerCommand.startsWith('sudo ') && !lowerCommand.includes('npm') && !lowerCommand.includes('yarn')) {
+    return { safe: false, reason: '管理者権限が必要なコマンドは制限されています' };
+  }
+
+  return { safe: true };
+}
+
+/**
+ * パスがワーキングディレクトリ内に制限されているかチェック
+ */
+function isPathSafe(filepath: string, baseDirectory: string): { safe: boolean; reason?: string } {
+  const path = require('path');
+  
+  try {
+    const resolvedPath = path.resolve(baseDirectory, filepath);
+    const resolvedBase = path.resolve(baseDirectory);
+    
+    if (!resolvedPath.startsWith(resolvedBase)) {
+      return { safe: false, reason: 'ワーキングディレクトリ外への操作は禁止されています' };
+    }
+    
+    return { safe: true };
+  } catch (error) {
+    return { safe: false, reason: 'パスの検証中にエラーが発生しました' };
+  }
+}
+
 async function executeFileOperation(
   responseJson: LLMResponse, 
   fileManager: FileManager, 
   baseDirectory: string
 ): Promise<void> {
   console.log(chalk.blue(`🔧 Executing operation: ${responseJson.type}`));
+
+  // ファイル操作のパス安全性チェック
+  if (responseJson.filepath && !isPathSafe(responseJson.filepath, baseDirectory).safe) {
+    const { reason } = isPathSafe(responseJson.filepath, baseDirectory);
+    console.log(chalk.red(`🚫 セキュリティ制限: ${reason}`));
+    return;
+  }
 
   switch (responseJson.type) {
     case 'create':
@@ -511,6 +595,13 @@ async function executeFileOperation(
 
     case 'execute':
       if (responseJson.command) {
+        // コマンドの安全性チェック
+        const { safe, reason } = isCommandSafe(responseJson.command);
+        if (!safe) {
+          console.log(chalk.red(`🚫 コマンド実行をブロックしました: ${reason}`));
+          return;
+        }
+
         try {
           console.log(chalk.cyan(`⚡ Executing command: ${responseJson.command}`));
           const result = execSync(responseJson.command, { 
