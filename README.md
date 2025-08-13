@@ -2,6 +2,9 @@
 
 A CLI tool for the fully autonomous AI service "aireer" - a parallel and scheduled execution tool that structures thought routines for automatic execution.
 
+For a comprehensive user guide, please see [USAGE.md](./USAGE.md).
+日本語の総合的な利用ガイドは [USAGE.md](./USAGE.md) をご覧ください。
+
 ## 📦 Installation
 
 ### Installation Method (Recommended)
