@@ -61,6 +61,10 @@ npm install @pianopia/aireer-cli#abc123
 
 3. **公開**
    ```bash
+   npm version patch
+   npm version minor
+   npm version major
+
    npm publish
    ```
 
