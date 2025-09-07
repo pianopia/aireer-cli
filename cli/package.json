@@ -1,6 +1,6 @@
 {
   "name": "@pianopia/aireer-cli",
-  "version": "1.0.6",
+  "version": "1.1.1",
   "description": "CLI tool that continuously hits APIs with parallel and scheduled execution",
   "type": "module",
   "main": "dist/index.js",
@@ -21,9 +21,10 @@
     "url": "https://github.com/pianopia/aireer-cli/issues"
   },
   "scripts": {
-    "build": "tsc && cp package.json dist/",
+    "build": "tsc && cp package.json dist/ && cp -r dashboard-public dist/",
     "start": "node dist/index.js",
     "dev": "tsc --watch & nodemon dist/index.js",
+    "dashboard": "node dist/dashboard-server.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -42,12 +43,17 @@
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
     "conf": "^11.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "inquirer": "^9.2.12",
     "nanoid": "^5.1.5",
     "node-cron": "^3.0.3",
-    "ora": "^7.0.1"
+    "ora": "^7.0.1",
+    "socket.io": "^4.7.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^20.10.4",
     "@types/node-cron": "^3.0.11",

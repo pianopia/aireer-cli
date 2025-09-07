@@ -539,6 +539,32 @@ program
     await checkApiHealth(options.url);
   });
 
+program
+  .command('dashboard')
+  .description('Start web dashboard server')
+  .option('-p, --port <port>', 'Port number for dashboard server', '3001')
+  .option('-u, --api-url <url>', 'API base URL', 'https://api.aireer.work')
+  .action(async (options: any) => {
+    displayCompactLogo();
+    const { DashboardServer } = await import('./dashboard-server.js');
+    
+    const port = parseInt(options.port);
+    const server = new DashboardServer(port, options.apiUrl);
+    
+    // Graceful shutdown
+    process.on('SIGINT', () => {
+      server.stop();
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', () => {
+      server.stop();
+      process.exit(0);
+    });
+    
+    await server.start();
+  });
+
 // Display help by default
 if (process.argv.length <= 2) {
   displayLogo();

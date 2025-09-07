@@ -96,9 +96,58 @@ aireer routine delete <routine-id>
 aireer routine run <routine-id>
 ```
 
+#### Web Dashboard
+```bash
+# Start dashboard server (default port: 3001)
+aireer dashboard
+
+# Start dashboard on custom port
+aireer dashboard --port 8080
+
+# Start dashboard with custom API URL
+aireer dashboard --api-url https://api.aireer.work
+```
+
 #### Scheduler
 ```bash
 aireer scheduler
+```
+
+## 📊 Web Dashboard
+
+Aireer CLIは、リアルタイムでCLIの実行状況を監視できるWebダッシュボードを提供します。
+
+### ダッシュボード機能
+
+- **システム状態監視**: 認証状態、API接続、LLM設定の確認
+- **実行統計**: 過去7日間の実行統計、成功率、平均実行時間
+- **ルーチン管理**: アクティブなルーチン一覧と実行状況
+- **リアルタイム更新**: Socket.IOによるリアルタイムデータ更新
+- **実行履歴**: 最近の実行履歴と詳細情報
+- **レスポンシブデザイン**: モバイル・デスクトップ対応
+
+### アクセス方法
+
+1. ダッシュボードサーバーを起動:
+   ```bash
+   aireer dashboard
+   ```
+
+2. ブラウザで以下のURLにアクセス:
+   ```
+   http://localhost:3001
+   ```
+
+3. ダッシュボードが表示され、リアルタイムでCLIの状況を監視できます
+
+### ダッシュボード設定
+
+```bash
+# カスタムポートで起動
+aireer dashboard --port 8080
+
+# カスタムAPI URLを使用
+aireer dashboard --api-url https://your-api.example.com
 ```
 
 ## ⚙️ Configuration

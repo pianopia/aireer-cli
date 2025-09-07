@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aireer CLI Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-robot"></i>
+                    <h1>Aireer CLI Dashboard</h1>
+                </div>
+                <div class="status-indicators">
+                    <div class="status-item" id="connection-status">
+                        <i class="fas fa-circle status-dot"></i>
+                        <span>接続中...</span>
+                    </div>
+                    <div class="status-item" id="auth-status">
+                        <i class="fas fa-user-check"></i>
+                        <span>認証状態</span>
+                    </div>
+                    <div class="last-update" id="last-update">
+                        最終更新: --
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- System Overview Cards -->
+            <section class="overview-section">
+                <div class="card-grid">
+                    <!-- System Status Card -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-server"></i> システム状態</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-grid">
+                                <div class="status-item">
+                                    <label>API URL:</label>
+                                    <span id="api-url">--</span>
+                                </div>
+                                <div class="status-item">
+                                    <label>LLMモード:</label>
+                                    <span id="llm-mode">--</span>
+                                </div>
+                                <div class="status-item">
+                                    <label>認証状態:</label>
+                                    <span id="auth-status-detail" class="status-badge">--</span>
+                                </div>
+                                <div class="status-item">
+                                    <label>Gemini設定:</label>
+                                    <span id="gemini-status" class="status-badge">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Execution Stats Card -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> 実行統計 (過去7日)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="total-executions">--</div>
+                                    <div class="stat-label">総実行数</div>
+                                </div>
+                                <div class="stat-item success">
+                                    <div class="stat-value" id="successful-executions">--</div>
+                                    <div class="stat-label">成功</div>
+                                </div>
+                                <div class="stat-item error">
+                                    <div class="stat-value" id="failed-executions">--</div>
+                                    <div class="stat-label">失敗</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="success-rate">--%</div>
+                                    <div class="stat-label">成功率</div>
+                                </div>
+                            </div>
+                            <div class="additional-stats">
+                                <div class="stat-row">
+                                    <span>平均実行時間:</span>
+                                    <span id="avg-duration">--ms</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>最終実行:</span>
+                                    <span id="last-execution">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Routines Section -->
+            <section class="routines-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list-check"></i> アクティブなルーチン</h2>
+                    <div class="section-controls">
+                        <button class="refresh-btn" onclick="refreshData()">
+                            <i class="fas fa-refresh"></i> 更新
+                        </button>
+                    </div>
+                </div>
+                <div class="routines-container">
+                    <div id="routines-loading" class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>ルーチンを読み込み中...</span>
+                    </div>
+                    <div id="routines-list" class="routines-list"></div>
+                    <div id="routines-empty" class="empty-state" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <h3>アクティブなルーチンがありません</h3>
+                        <p>ルーチンを作成・アクティベートして自動実行を開始してください。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Executions Section -->
+            <section class="executions-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> 最近の実行履歴</h2>
+                </div>
+                <div class="executions-container">
+                    <div id="executions-loading" class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>実行履歴を読み込み中...</span>
+                    </div>
+                    <div id="executions-list" class="executions-list"></div>
+                    <div id="executions-empty" class="empty-state" style="display: none;">
+                        <i class="fas fa-clock"></i>
+                        <h3>実行履歴がありません</h3>
+                        <p>ルーチンが実行されると履歴がここに表示されます。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Error Toast -->
+        <div id="error-toast" class="toast error-toast">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="error-message">エラーが発生しました</span>
+            <button onclick="hideErrorToast()" class="toast-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Success Toast -->
+        <div id="success-toast" class="toast success-toast">
+            <i class="fas fa-check-circle"></i>
+            <span id="success-message">更新されました</span>
+            <button onclick="hideSuccessToast()" class="toast-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

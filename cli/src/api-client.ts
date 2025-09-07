@@ -3,8 +3,10 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 export class ApiClient {
   private client: AxiosInstance;
   private authToken?: string;
+  private baseUrl: string;
 
   constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
     this.client = axios.create({
       baseURL: baseUrl,
       timeout: 10000,
@@ -48,6 +50,10 @@ export class ApiClient {
 
   clearAuthToken(): void {
     this.authToken = undefined;
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   async get(endpoint: string): Promise<any> {
