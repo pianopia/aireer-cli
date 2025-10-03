@@ -95,23 +95,37 @@ program
   .command('config')
   .description('Display/modify configuration')
   .option('--show', 'Display current configuration')
-  .option('--llm-mode <mode>', 'Set LLM mode (api | gemini-direct)')
+  .option('--llm-mode <mode>', 'Set LLM mode (api | gemini-direct | openai-direct | claude-direct)')
   .option('--gemini-key <key>', 'Set Gemini API key')
   .option('--gemini-test', 'Test Gemini API connection')
   .option('--gemini-guide', 'Display Gemini API setup guide')
+  .option('--openai-key <key>', 'Set OpenAI API key')
+  .option('--openai-test', 'Test OpenAI API connection')
+  .option('--openai-guide', 'Display OpenAI API setup guide')
+  .option('--claude-key <key>', 'Set Claude (Anthropic) API key')
+  .option('--claude-test', 'Test Claude (Anthropic) API connection')
+  .option('--claude-guide', 'Display Claude (Anthropic) API setup guide')
   .action(async (options: any) => {
     displayCompactLogo();
     const configManager = new ConfigManager();
     
-    // Gemini API設定ガイド表示
+    // 各プロバイダの設定ガイド表示
     if (options.geminiGuide) {
       configManager.displayGeminiSetupGuide();
+      return;
+    }
+    if (options.openaiGuide) {
+      configManager.displayOpenAISetupGuide();
+      return;
+    }
+    if (options.claudeGuide) {
+      configManager.displayClaudeSetupGuide();
       return;
     }
     
     // LLMモード設定
     if (options.llmMode) {
-      if (options.llmMode === 'api' || options.llmMode === 'gemini-direct') {
+      if (['api', 'gemini-direct', 'openai-direct', 'claude-direct'].includes(options.llmMode)) {
         configManager.setLLMMode(options.llmMode);
         console.log(chalk.green(`✅ LLM mode set to "${options.llmMode}"`));
         
@@ -119,8 +133,16 @@ program
           console.log(chalk.yellow('⚠️  To use Gemini Direct mode, you need to set an API key'));
           configManager.displayGeminiSetupGuide();
         }
+        if (options.llmMode === 'openai-direct' && !configManager.getOpenAIApiKey()) {
+          console.log(chalk.yellow('⚠️  To use OpenAI Direct mode, you need to set an API key'));
+          configManager.displayOpenAISetupGuide();
+        }
+        if (options.llmMode === 'claude-direct' && !configManager.getAnthropicApiKey()) {
+          console.log(chalk.yellow('⚠️  To use Claude Direct mode, you need to set an API key'));
+          configManager.displayClaudeSetupGuide();
+        }
       } else {
-        console.log(chalk.red('❌ Invalid LLM mode. Please specify "api" or "gemini-direct".'));
+        console.log(chalk.red('❌ Invalid LLM mode. Please specify "api", "gemini-direct", "openai-direct", or "claude-direct".'));
         return;
       }
     }
@@ -154,6 +176,49 @@ program
         }
       }
     }
+
+    // OpenAI APIキー設定
+    if (options.openaiKey) {
+      const { OpenAIClient } = await import('./openai-client.js');
+      if (!OpenAIClient.validateApiKey(options.openaiKey)) {
+        console.log(chalk.red('❌ Invalid OpenAI API key format'));
+        console.log(chalk.gray('   Usually starts with sk-...'));
+        return;
+      }
+      configManager.setOpenAIApiKey(options.openaiKey);
+      console.log(chalk.green('✅ OpenAI API key has been set'));
+      if (configManager.getLLMMode() !== 'openai-direct') {
+        const inquirer = await import('inquirer');
+        const { switchMode } = await inquirer.default.prompt([{
+          type: 'confirm', name: 'switchMode', message: 'Switch LLM mode to OpenAI Direct?', default: true
+        }]);
+        if (switchMode) {
+          configManager.setLLMMode('openai-direct');
+          console.log(chalk.green('✅ Switched LLM mode to OpenAI Direct'));
+        }
+      }
+    }
+
+    // Claude(Anthropic) APIキー設定
+    if (options.claudeKey) {
+      const { AnthropicClient } = await import('./anthropic-client.js');
+      if (!AnthropicClient.validateApiKey(options.claudeKey)) {
+        console.log(chalk.red('❌ Invalid Anthropic API key format'));
+        return;
+      }
+      configManager.setAnthropicApiKey(options.claudeKey);
+      console.log(chalk.green('✅ Claude(Anthropic) API key has been set'));
+      if (configManager.getLLMMode() !== 'claude-direct') {
+        const inquirer = await import('inquirer');
+        const { switchMode } = await inquirer.default.prompt([{
+          type: 'confirm', name: 'switchMode', message: 'Switch LLM mode to Claude Direct?', default: true
+        }]);
+        if (switchMode) {
+          configManager.setLLMMode('claude-direct');
+          console.log(chalk.green('✅ Switched LLM mode to Claude Direct'));
+        }
+      }
+    }
     
     // Gemini API接続テスト
     if (options.geminiTest) {
@@ -180,9 +245,49 @@ program
       }
       return;
     }
+
+    // OpenAI API接続テスト
+    if (options.openaiTest) {
+      const apiKey = configManager.getOpenAIApiKey();
+      if (!apiKey) {
+        console.log(chalk.red('❌ OpenAI API key is not set'));
+        configManager.displayOpenAISetupGuide();
+        return;
+      }
+      try {
+        const { OpenAIClient } = await import('./openai-client.js');
+        const client = new OpenAIClient(apiKey);
+        const success = await client.testConnection();
+        console.log(success ? chalk.green('🎉 OpenAI API connection test successful!') : chalk.red('❌ OpenAI API connection test failed'));
+      } catch (error) {
+        console.log(chalk.red('❌ OpenAI API connection test failed'));
+        console.error(error);
+      }
+      return;
+    }
+
+    // Claude API接続テスト
+    if (options.claudeTest) {
+      const apiKey = configManager.getAnthropicApiKey();
+      if (!apiKey) {
+        console.log(chalk.red('❌ Claude (Anthropic) API key is not set'));
+        configManager.displayClaudeSetupGuide();
+        return;
+      }
+      try {
+        const { AnthropicClient } = await import('./anthropic-client.js');
+        const client = new AnthropicClient(apiKey);
+        const success = await client.testConnection();
+        console.log(success ? chalk.green('🎉 Claude API connection test successful!') : chalk.red('❌ Claude API connection test failed'));
+      } catch (error) {
+        console.log(chalk.red('❌ Claude API connection test failed'));
+        console.error(error);
+      }
+      return;
+    }
     
     // デフォルト動作: 設定表示
-    if (!options.llmMode && !options.geminiKey && !options.geminiTest) {
+    if (!options.llmMode && !options.geminiKey && !options.geminiTest && !options.openaiKey && !options.openaiTest && !options.claudeKey && !options.claudeTest) {
       configManager.displayConfig();
     }
   });
@@ -203,41 +308,74 @@ program
     
     // LLMモードに応じた認証チェック
     const llmMode = configManager.getLLMMode();
-    const useGeminiDirect = llmMode === 'gemini-direct';
+    const useDirect = ['gemini-direct', 'openai-direct', 'claude-direct'].includes(llmMode);
     
-    if (!useGeminiDirect) {
+    if (!useDirect) {
       // Authentication required for API mode
       if (!(await authManager.ensureAuthenticated())) {
         console.log(chalk.red('❌ Authentication required. Please login with "aireer login".'));
         process.exit(1);
       }
     } else {
-      // API key required for Gemini direct mode
-      if (!configManager.isGeminiConfigured()) {
+      // API key required for direct modes
+      if (llmMode === 'gemini-direct' && !configManager.isGeminiConfigured()) {
         console.log(chalk.red('❌ Gemini API key is not set.'));
         console.log(chalk.cyan('Please set the API key with the following command:'));
         console.log(chalk.gray('aireer config --gemini-guide'));
+        process.exit(1);
+      }
+      if (llmMode === 'openai-direct' && !configManager.isOpenAIConfigured()) {
+        console.log(chalk.red('❌ OpenAI API key is not set.'));
+        console.log(chalk.cyan('Please set the API key with the following command:'));
+        console.log(chalk.gray('aireer config --openai-guide'));
+        process.exit(1);
+      }
+      if (llmMode === 'claude-direct' && !configManager.isAnthropicConfigured()) {
+        console.log(chalk.red('❌ Claude (Anthropic) API key is not set.'));
+        console.log(chalk.cyan('Please set the API key with the following command:'));
+        console.log(chalk.gray('aireer config --claude-guide'));
         process.exit(1);
       }
     }
 
     displayLogo();
     
-    let geminiClient;
-    if (useGeminiDirect) {
+    let llmClient: any;
+    if (useDirect) {
       try {
-        const { GeminiClient } = await import('./gemini-client.js');
-        const apiKey = configManager.getGeminiApiKey()!;
-        geminiClient = new GeminiClient(apiKey);
-        
-        console.log(chalk.blue('🔍 Checking Gemini API connection...'));
-        const connectionOk = await geminiClient.testConnection();
-        if (!connectionOk) {
-          console.log(chalk.red('❌ Cannot connect to Gemini API. Please check your API key.'));
-          process.exit(1);
+        if (llmMode === 'gemini-direct') {
+          const { GeminiClient } = await import('./gemini-client.js');
+          const apiKey = configManager.getGeminiApiKey()!;
+          llmClient = new GeminiClient(apiKey);
+          console.log(chalk.blue('🔍 Checking Gemini API connection...'));
+          const ok = await llmClient.testConnection();
+          if (!ok) {
+            console.log(chalk.red('❌ Cannot connect to Gemini API. Please check your API key.'));
+            process.exit(1);
+          }
+        } else if (llmMode === 'openai-direct') {
+          const { OpenAIClient } = await import('./openai-client.js');
+          const apiKey = configManager.getOpenAIApiKey()!;
+          llmClient = new OpenAIClient(apiKey);
+          console.log(chalk.blue('🔍 Checking OpenAI API connection...'));
+          const ok = await llmClient.testConnection();
+          if (!ok) {
+            console.log(chalk.red('❌ Cannot connect to OpenAI API. Please check your API key.'));
+            process.exit(1);
+          }
+        } else if (llmMode === 'claude-direct') {
+          const { AnthropicClient } = await import('./anthropic-client.js');
+          const apiKey = configManager.getAnthropicApiKey()!;
+          llmClient = new AnthropicClient(apiKey);
+          console.log(chalk.blue('🔍 Checking Claude (Anthropic) API connection...'));
+          const ok = await llmClient.testConnection();
+          if (!ok) {
+            console.log(chalk.red('❌ Cannot connect to Anthropic API. Please check your API key.'));
+            process.exit(1);
+          }
         }
       } catch (error) {
-        console.log(chalk.red('❌ Failed to initialize Gemini client:'), error);
+        console.log(chalk.red('❌ Failed to initialize LLM client:'), error);
         process.exit(1);
       }
     }
@@ -249,8 +387,8 @@ program
       llmEndpoint: options.llmEndpoint,
       maxExecutionsPerCycle: parseInt(options.maxExecutions),
       authManager,
-      useGeminiDirect,
-      geminiClient
+      useDirectLLM: useDirect,
+      llmClient
     });
   });
 

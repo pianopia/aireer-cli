@@ -156,6 +156,8 @@ aireer dashboard --api-url https://your-api.example.com
 
 - `api`: Use LLM via aireer API server
 - `gemini-direct`: Connect directly to Gemini API
+- `openai-direct`: Connect directly to OpenAI API
+- `claude-direct`: Connect directly to Claude (Anthropic) API
 
 ### Gemini Direct Mode
 
@@ -164,6 +166,22 @@ When using Gemini API directly:
 1. Get API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Set API key: `aireer config --gemini-key "YOUR_API_KEY"`
 3. Change LLM mode: `aireer config --llm-mode gemini-direct`
+
+### OpenAI Direct Mode
+
+When using OpenAI API directly:
+
+1. Get API key from https://platform.openai.com/api-keys
+2. Set API key: `aireer config --openai-key "YOUR_API_KEY"`
+3. Change LLM mode: `aireer config --llm-mode openai-direct`
+
+### Claude (Anthropic) Direct Mode
+
+When using Anthropic (Claude) API directly:
+
+1. Get API key from https://console.anthropic.com/settings/keys
+2. Set API key: `aireer config --claude-key "YOUR_API_KEY"`
+3. Change LLM mode: `aireer config --llm-mode claude-direct`
 
 ## 🛠️ Development
 

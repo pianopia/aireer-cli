@@ -3,12 +3,14 @@ import path from 'path';
 import os from 'os';
 import chalk from 'chalk';
 
-export type LLMMode = 'api' | 'gemini-direct';
+export type LLMMode = 'api' | 'gemini-direct' | 'openai-direct' | 'claude-direct';
 
 export interface Config {
   apiUrl: string;
   llmMode: LLMMode;
   geminiApiKey?: string;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
   token?: string;
   user?: {
     id: string;
@@ -84,6 +86,34 @@ export class ConfigManager {
     this.saveConfig();
   }
 
+  getOpenAIApiKey(): string | undefined {
+    return this.config.openaiApiKey;
+  }
+
+  setOpenAIApiKey(apiKey: string): void {
+    this.config.openaiApiKey = apiKey;
+    this.saveConfig();
+  }
+
+  clearOpenAIApiKey(): void {
+    delete this.config.openaiApiKey;
+    this.saveConfig();
+  }
+
+  getAnthropicApiKey(): string | undefined {
+    return this.config.anthropicApiKey;
+  }
+
+  setAnthropicApiKey(apiKey: string): void {
+    this.config.anthropicApiKey = apiKey;
+    this.saveConfig();
+  }
+
+  clearAnthropicApiKey(): void {
+    delete this.config.anthropicApiKey;
+    this.saveConfig();
+  }
+
   getToken(): string | undefined {
     return this.config.token;
   }
@@ -116,6 +146,14 @@ export class ConfigManager {
     return this.config.llmMode === 'gemini-direct' && !!this.config.geminiApiKey;
   }
 
+  isOpenAIConfigured(): boolean {
+    return this.config.llmMode === 'openai-direct' && !!this.config.openaiApiKey;
+  }
+
+  isAnthropicConfigured(): boolean {
+    return this.config.llmMode === 'claude-direct' && !!this.config.anthropicApiKey;
+  }
+
   getConfig(): Config {
     return { ...this.config };
   }
@@ -125,10 +163,25 @@ export class ConfigManager {
     console.log(chalk.gray('━'.repeat(30)));
     console.log(`API URL: ${chalk.cyan(this.config.apiUrl)}`);
     console.log(`LLM Mode: ${chalk.cyan(this.config.llmMode)}`);
-    
-    if (this.config.llmMode === 'gemini-direct') {
-      const hasKey = !!this.config.geminiApiKey;
-      console.log(`Gemini API Key: ${hasKey ? chalk.green('✅ Configured') : chalk.red('❌ Not set')}`);
+
+    switch (this.config.llmMode) {
+      case 'gemini-direct': {
+        const hasKey = !!this.config.geminiApiKey;
+        console.log(`Gemini API Key: ${hasKey ? chalk.green('✅ Configured') : chalk.red('❌ Not set')}`);
+        break;
+      }
+      case 'openai-direct': {
+        const hasKey = !!this.config.openaiApiKey;
+        console.log(`OpenAI API Key: ${hasKey ? chalk.green('✅ Configured') : chalk.red('❌ Not set')}`);
+        break;
+      }
+      case 'claude-direct': {
+        const hasKey = !!this.config.anthropicApiKey;
+        console.log(`Anthropic API Key: ${hasKey ? chalk.green('✅ Configured') : chalk.red('❌ Not set')}`);
+        break;
+      }
+      default:
+        break;
     }
     
     if (this.config.user) {
@@ -153,4 +206,32 @@ export class ConfigManager {
     console.log(chalk.cyan('   aireer config --llm-mode gemini-direct'));
     console.log();
   }
-} 
+
+  // OpenAI API key setup guide
+  displayOpenAISetupGuide(): void {
+    console.log(chalk.blue('\n🔑 OpenAI API Setup Guide'));
+    console.log(chalk.gray('━'.repeat(40)));
+    console.log(chalk.white('1. Access OpenAI API Keys page'));
+    console.log(chalk.cyan('   https://platform.openai.com/api-keys'));
+    console.log(chalk.white('2. Create a new API key'));
+    console.log(chalk.white('3. Set the API key with the following command:'));
+    console.log(chalk.cyan('   aireer config --openai-key YOUR_API_KEY'));
+    console.log(chalk.white('4. Switch LLM mode to OpenAI Direct:'));
+    console.log(chalk.cyan('   aireer config --llm-mode openai-direct'));
+    console.log();
+  }
+
+  // Anthropic (Claude) API key setup guide
+  displayClaudeSetupGuide(): void {
+    console.log(chalk.blue('\n🔑 Claude (Anthropic) API Setup Guide'));
+    console.log(chalk.gray('━'.repeat(40)));
+    console.log(chalk.white('1. Access Anthropic API Keys page'));
+    console.log(chalk.cyan('   https://console.anthropic.com/settings/keys'));
+    console.log(chalk.white('2. Create a new API key'));
+    console.log(chalk.white('3. Set the API key with the following command:'));
+    console.log(chalk.cyan('   aireer config --claude-key YOUR_API_KEY'));
+    console.log(chalk.white('4. Switch LLM mode to Claude Direct:'));
+    console.log(chalk.cyan('   aireer config --llm-mode claude-direct'));
+    console.log();
+  }
+}

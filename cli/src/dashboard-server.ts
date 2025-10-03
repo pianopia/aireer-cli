@@ -22,6 +22,8 @@ export interface DashboardData {
     apiUrl: string;
     llmMode: string;
     geminiConfigured: boolean;
+    openaiConfigured: boolean;
+    claudeConfigured: boolean;
     currentTime: string;
   };
   executionStats: {
@@ -127,6 +129,8 @@ export class DashboardServer {
           apiUrl: this.apiClient.getBaseUrl(),
           llmMode: this.configManager.getLLMMode(),
           geminiConfigured: this.configManager.isGeminiConfigured(),
+          openaiConfigured: this.configManager.isOpenAIConfigured(),
+          claudeConfigured: this.configManager.isAnthropicConfigured(),
           currentTime: new Date().toISOString()
         }
       });
@@ -265,6 +269,8 @@ export class DashboardServer {
       apiUrl: this.apiClient.getBaseUrl(),
       llmMode: this.configManager.getLLMMode(),
       geminiConfigured: this.configManager.isGeminiConfigured(),
+      openaiConfigured: this.configManager.isOpenAIConfigured(),
+      claudeConfigured: this.configManager.isAnthropicConfigured(),
       currentTime: new Date().toISOString()
     };
 

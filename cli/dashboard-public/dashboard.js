@@ -162,6 +162,22 @@ class AireerDashboard {
             geminiStatusElement.className = 'status-badge ' + 
                 (systemStatus.geminiConfigured ? 'configured' : 'not-configured');
         }
+
+        // OpenAI Status
+        const openaiStatusElement = document.getElementById('openai-status');
+        if (openaiStatusElement) {
+            openaiStatusElement.textContent = systemStatus.openaiConfigured ? '設定済み' : '未設定';
+            openaiStatusElement.className = 'status-badge ' + 
+                (systemStatus.openaiConfigured ? 'configured' : 'not-configured');
+        }
+
+        // Claude Status
+        const claudeStatusElement = document.getElementById('claude-status');
+        if (claudeStatusElement) {
+            claudeStatusElement.textContent = systemStatus.claudeConfigured ? '設定済み' : '未設定';
+            claudeStatusElement.className = 'status-badge ' + 
+                (systemStatus.claudeConfigured ? 'configured' : 'not-configured');
+        }
     }
 
     updateExecutionStats(stats) {

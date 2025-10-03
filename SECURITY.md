@@ -24,6 +24,24 @@ aireer config --gemini-key YOUR_GEMINI_API_KEY
 export GEMINI_API_KEY=your-key-here
 ```
 
+#### OpenAI APIキー
+```bash
+# ✅ 正しい設定方法
+aireer config --openai-key YOUR_OPENAI_API_KEY
+
+# ❌ 避けるべき: 環境変数での永続化
+export OPENAI_API_KEY=your-key-here
+```
+
+#### Claude (Anthropic) APIキー
+```bash
+# ✅ 正しい設定方法
+aireer config --claude-key YOUR_ANTHROPIC_API_KEY
+
+# ❌ 避けるべき: 環境変数での永続化
+export ANTHROPIC_API_KEY=your-key-here
+```
+
 #### 認証トークン
 - ログイン時に自動でローカル設定ファイルに保存されます
 - 手動でトークンを編集しないでください

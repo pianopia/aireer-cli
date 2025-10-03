@@ -7,7 +7,6 @@ import { RateLimitHandler } from './rate-limit-handler.js';
 import { LogManager } from './log-manager.js';
 import { AuthManager } from './auth-manager.js';
 import { ExecutionHistory, ExecutionDetail, FileOperation } from './execution-history.js';
-import { GeminiClient, GeminiRequest } from './gemini-client.js';
 import { execSync } from 'child_process';
 import { nanoid } from 'nanoid';
 
@@ -18,8 +17,11 @@ interface AutonomousOptions {
   llmEndpoint: string;
   maxExecutionsPerCycle: number;
   authManager: AuthManager;
-  useGeminiDirect?: boolean;
-  geminiClient?: GeminiClient;
+  useDirectLLM?: boolean;
+  llmClient?: {
+    generateContent: (request: { prompt: string; temperature?: number; maxTokens?: number }) => Promise<{ content: string | null; rawResponse: any; success: boolean; error?: string }>;
+    testConnection: () => Promise<boolean>;
+  };
 }
 
 interface LLMResponse {
@@ -36,7 +38,7 @@ export async function startAutonomousMode(options: AutonomousOptions): Promise<v
   console.log(chalk.gray(`Working directory: ${options.directory}`));
   console.log(chalk.gray(`Execution interval: ${options.interval} seconds`));
   console.log(chalk.gray(`Max executions/cycle: ${options.maxExecutionsPerCycle}`));
-  console.log(chalk.gray(`LLM mode: ${options.useGeminiDirect ? 'Gemini Direct' : 'Via API'}\n`));
+  console.log(chalk.gray(`LLM mode: ${options.useDirectLLM ? 'Direct' : 'Via API'}\n`));
 
   const routineManager = new RoutineManager(options.apiUrl, options.directory, options.authManager);
   const apiClient = new ApiClient(options.apiUrl);
@@ -230,10 +232,10 @@ async function executeRoutine(
     // Call LLM API (Gemini direct or via API)
     let llmResult: { content: string | null; rawResponse: any };
     
-    if (options.useGeminiDirect && options.geminiClient) {
+    if (options.useDirectLLM && options.llmClient) {
       // Direct request to Gemini API
       const geminiResult = await RateLimitHandler.executeWithRetry(
-        () => options.geminiClient!.generateContent({ prompt: fullPrompt }),
+        () => options.llmClient!.generateContent({ prompt: fullPrompt }),
         { maxRetries: 2, baseDelay: 2000 }
       );
       llmResult = {
