@@ -1,5 +1,9 @@
 # セキュリティガイドライン
 
+## インシデント対応（履歴洗浄）
+
+孤立コミット `73f079a` に含まれていた漏洩キーの洗浄状況・検証手順・GitHub Support への purge 依頼は [docs/SECURITY_REMEDIATION_ORPHAN_COMMIT.md](docs/SECURITY_REMEDIATION_ORPHAN_COMMIT.md) を参照してください。リポジトリ内の検証は `./scripts/verify-no-secrets.sh` を実行します。
+
 ## 🔐 機密情報の管理
 
 aireer-cliでは以下の機密情報を適切に管理してください：
